@@ -1,0 +1,82 @@
+version: 1
+
+initial_state: MVP_DEFINITION
+
+states:
+  MVP_DEFINITION:
+    description: "Define the actual project's MVP using docs/MVP.md."
+    allowed_request_types:
+      - MVP_DESIGN_REQUEST
+      - STATE_STATUS_REQUEST
+      - STATE_TRANSITION_REQUEST
+      - UNKNOWN
+    next_states:
+      - ARCHITECTURE_DESIGN
+
+  ARCHITECTURE_DESIGN:
+    description: "Define the actual project's system architecture using docs/ARCHITECTURE.md."
+    allowed_request_types:
+      - ARCHITECTURE_DESIGN_REQUEST
+      - STATE_STATUS_REQUEST
+      - STATE_TRANSITION_REQUEST
+      - UNKNOWN
+    next_states:
+      - FEATURE_INDEX_DEFINITION
+
+  FEATURE_INDEX_DEFINITION:
+    description: "Define the actual project's feature index using docs/features/feature-index.md."
+    allowed_request_types:
+      - FEATURE_INDEX_REQUEST
+      - STATE_STATUS_REQUEST
+      - STATE_TRANSITION_REQUEST
+      - UNKNOWN
+    next_states:
+      - DATA_MODEL_DEFINITION
+
+  DATA_MODEL_DEFINITION:
+    description: "Define the actual project's data model baseline and Prisma baseline."
+    allowed_request_types:
+      - DATA_MODEL_DESIGN_REQUEST
+      - PRISMA_BASELINE_CREATE_REQUEST
+      - STATE_STATUS_REQUEST
+      - STATE_TRANSITION_REQUEST
+      - UNKNOWN
+    next_states:
+      - API_DESIGN
+
+  API_DESIGN:
+    description: "Define the actual project's API boundaries using docs/API.md."
+    allowed_request_types:
+      - API_DESIGN_REQUEST
+      - STATE_STATUS_REQUEST
+      - STATE_TRANSITION_REQUEST
+      - UNKNOWN
+    next_states:
+      - FRONTEND_DESIGN
+
+  FRONTEND_DESIGN:
+    description: "Confirm the actual project's design guide using docs/DESIGN.md or STATE approvals.design."
+    allowed_request_types:
+      - FRONTEND_DESIGN_REQUEST
+      - STATE_STATUS_REQUEST
+      - STATE_TRANSITION_REQUEST
+      - UNKNOWN
+    next_states:
+      - FEATURE_IMPLEMENTATION
+
+  FEATURE_IMPLEMENTATION:
+    description: "Run feature-level implementation using docs/FEATURE_IMPLEMENTATION_PIPELINE.md."
+    allowed_request_types:
+      - FEATURE_PREPARE_REQUEST
+      - FEATURE_DESIGN_REQUEST
+      - IMPLEMENTATION_REQUEST
+      - TEST_REQUEST
+      - COMMIT_REQUEST
+      - STATE_STATUS_REQUEST
+      - UNKNOWN
+    next_states: []
+
+unknown_request_policy:
+  allow_without_state_transition: true
+  allowed_behavior: "Answer explanation, analysis, status, and documentation requests. File changes are limited by AGENTS.md."
+  forbidden_behavior: "Do not modify app/src/apps code, create tests, run implementation pipeline, commit, or update STATE.md."

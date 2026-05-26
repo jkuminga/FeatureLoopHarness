@@ -1,0 +1,96 @@
+version: 1
+
+defaults:
+  required_status: completed
+  forbidden_tokens:
+    - "{{TODO"
+    - "TODO"
+    - "TBD"
+    - "PLACEHOLDER"
+  min_section_chars: 40
+
+documents:
+  mvp:
+    path: docs/MVP.md
+    purpose: "Template completed by the actual project to define MVP scope."
+    required_sections:
+      - "MVP Goal"
+      - "Target Users"
+      - "Core Problem"
+      - "In Scope"
+      - "Out of Scope"
+      - "Success Criteria"
+
+  architecture:
+    path: docs/ARCHITECTURE.md
+    purpose: "Template completed by the actual project to define system architecture."
+    required_sections:
+      - "System Overview"
+      - "Modules"
+      - "Data Flow"
+      - "External Dependencies"
+      - "Runtime Environment"
+      - "Constraints"
+
+  feature_index:
+    path: docs/features/feature-index.md
+    purpose: "Template completed by the actual project to list feature candidates and priorities."
+    required_sections:
+      - "Feature Index"
+      - "Feature List"
+    required_item_fields:
+      - "Feature ID"
+      - "Name"
+      - "Summary"
+      - "Priority"
+      - "Core Requirements"
+
+  db_schema:
+    path: docs/DB_SCHEMA.md
+    purpose: "Template completed by the actual project to define data model baseline."
+    required_sections:
+      - "Core Entities"
+      - "Relationships"
+      - "Ownership and Permissions"
+      - "ID Strategy"
+      - "Lifecycle Policy"
+      - "Common Fields"
+      - "Prisma Baseline"
+
+  api:
+    path: docs/API.md
+    purpose: "Template completed by the actual project to define API boundaries."
+    required_sections:
+      - "API Areas"
+      - "Endpoint Draft"
+      - "Authentication and Authorization"
+      - "Request and Response Rules"
+      - "Error Response Rules"
+
+  design:
+    path: docs/DESIGN.md
+    purpose: "Design guideline file for the actual project. It may be authored in this workflow or imported from an external source and approved in STATE.md."
+    required_sections:
+      - "Layout Principles"
+      - "Component Principles"
+      - "State Loading and Error"
+      - "Form Rules"
+      - "Responsive Rules"
+      - "Accessibility"
+
+  feature_implementation_pipeline:
+    path: docs/FEATURE_IMPLEMENTATION_PIPELINE.md
+    purpose: "Harness operation document for feature-level implementation."
+    required_status: completed
+    required_sections:
+      - "Overview"
+      - "Feature State Directories"
+      - "0. Preparation"
+      - "1. Design"
+      - "Baseline DB Deployment"
+      - "2. Branch and Worktree"
+      - "3. Implementation and Tests"
+      - "4. Verification"
+      - "Quality Scoring"
+      - "5. Feedback Loop"
+      - "6. Commit Merge and Cleanup"

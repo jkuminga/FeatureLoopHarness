@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".codex/hooks/user-prompt-submit.sh",
+            "statusMessage": "Checking harness workflow state",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

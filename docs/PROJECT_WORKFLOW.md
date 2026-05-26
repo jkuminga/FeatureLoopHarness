@@ -1,0 +1,230 @@
+# PROJECT_WORKFLOW.md
+
+하네스가 실제 프로젝트에 적용할 프로젝트 전체 워크플로우를 정의한다.
+
+이 문서는 하네스 자체의 MVP, 아키텍처, DB, API, 프론트엔드 설계를 기록하는 문서가 아니다.
+이 문서는 앞으로 하네스를 적용받는 실제 프로젝트가 어떤 순서로 문서를 완성하고 기능 구현 단계로 진입해야 하는지를 설명한다.
+
+---
+
+## Purpose
+
+하네스의 핵심 목적은 실제 구현을 기능 단위로 통제하는 것이다.
+
+이를 위해 기능 구현에 들어가기 전 실제 프로젝트는 다음 산출물을 순서대로 준비해야 한다.
+
+- MVP 정의
+- 시스템 아키텍처 정의
+- 기능 목록 정의
+- 데이터 모델 baseline 정의
+- API 경계 정의
+- 디자인 지침 정의
+- 기능 단위 구현 진입
+
+프로젝트 레벨 상태 전이는 `codex/runtime/STATE.md`와 `codex/workflow/*` 설정으로 관리한다.
+기능 단위 구현은 `FEATURE_IMPLEMENTATION` 상태에서만 `docs/FEATURE_IMPLEMENTATION_PIPELINE.md`를 기준으로 진행한다.
+
+---
+
+## Runtime Files
+
+프로젝트 전체 워크플로우는 다음 파일들이 제어한다.
+
+- `codex/runtime/STATE.md`: 현재 상태, 완료 상태, 승인 기록
+- `codex/workflow/flow.yml`: 상태 목록, 상태별 허용 request_type, next state
+- `codex/workflow/docs-spec.yml`: 문서별 완료 판정 기준
+- `codex/workflow/transition-guards.yml`: 상태 전이별 guard 조합
+
+사람이 읽는 설명은 이 문서에 둔다.
+훅이 파싱하는 규칙은 `codex/workflow/*.yml`에 둔다.
+
+---
+
+## State Flow
+
+```text
+MVP_DEFINITION
+-> ARCHITECTURE_DESIGN
+-> FEATURE_INDEX_DEFINITION
+-> DATA_MODEL_DEFINITION
+-> API_DESIGN
+-> FRONTEND_DESIGN
+-> FEATURE_IMPLEMENTATION
+```
+
+상태 전이는 기본적으로 순차적으로만 진행한다.
+현재 상태와 요청이 요구하는 상태 사이에 여러 단계가 있으면, 중간 transition guard를 모두 통과해야 한다.
+
+---
+
+## 1. MVP Definition
+
+실제 프로젝트의 MVP 범위를 정의하는 단계다.
+
+템플릿 문서:
+
+- `docs/MVP.md`
+
+이 문서는 하네스 패키지에서 템플릿으로 제공된다.
+실제 프로젝트가 시작되면 사용자가 해당 프로젝트의 내용으로 채운다.
+
+완료 기준은 `codex/workflow/docs-spec.yml`의 `mvp` 항목을 따른다.
+
+---
+
+## 2. Architecture Design
+
+실제 프로젝트의 시스템 아키텍처를 정의하는 단계다.
+
+템플릿 문서:
+
+- `docs/ARCHITECTURE.md`
+
+포함해야 하는 대표 항목:
+
+- 시스템 개요
+- 주요 모듈
+- 데이터 흐름
+- 외부 의존성
+- 실행 환경
+- 아키텍처 제약사항
+
+완료 기준은 `codex/workflow/docs-spec.yml`의 `architecture` 항목을 따른다.
+
+---
+
+## 3. Feature Index Definition
+
+실제 프로젝트의 기능 후보 목록과 우선순위를 정의하는 단계다.
+
+템플릿 문서:
+
+- `docs/features/feature-index.md`
+
+이 단계에서는 기능별 상세 구현 문서를 만들지 않는다.
+기능 목록, 요약, 우선순위, 핵심 요구사항만 정리한다.
+
+기능의 실제 진행 상태는 `feature-index.md`가 아니라 `docs/features/*/` 디렉토리 위치를 기준으로 판단한다.
+
+완료 기준은 `codex/workflow/docs-spec.yml`의 `feature_index` 항목을 따른다.
+
+---
+
+## 4. Data Model Definition
+
+실제 프로젝트의 데이터 모델 baseline을 정의하는 단계다.
+
+템플릿 문서:
+
+- `docs/DB_SCHEMA.md`
+
+허용되는 예외 작업:
+
+- `prisma/schema.prisma` 생성/수정
+- baseline migration 생성 또는 준비
+
+이 예외는 데이터 모델 baseline을 만들기 위한 작업에만 적용한다.
+앱 기능 구현, API 구현, UI 구현, 기능 테스트 작성은 여전히 금지한다.
+
+이 단계는 실제 DB 서버 배포를 강제하지 않는다.
+목표는 구현을 시작할 수 있을 만큼 데이터 모델 baseline 산출물을 확정하는 것이다.
+
+실제 DB 서버 배포와 검증은 `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
+그 결과는 `codex/runtime/STATE.md`의 `approvals.database_baseline`에 기록한다.
+
+완료 기준은 다음을 따른다.
+
+- `codex/workflow/docs-spec.yml`의 `db_schema` 항목
+- `codex/workflow/transition-guards.yml`의 `DATA_MODEL_DEFINITION_TO_API_DESIGN` 항목
+
+---
+
+## 5. API Design
+
+실제 프로젝트의 API 경계와 공통 규칙을 정의하는 단계다.
+
+템플릿 문서:
+
+- `docs/API.md`
+
+포함해야 하는 대표 항목:
+
+- API 영역
+- endpoint 초안
+- 인증/인가 원칙
+- request/response 규칙
+- 에러 응답 규칙
+
+완료 기준은 `codex/workflow/docs-spec.yml`의 `api` 항목을 따른다.
+
+---
+
+## 6. Frontend Design
+
+실제 프로젝트의 디자인 지침을 확정하는 단계다.
+
+산출물:
+
+- `docs/DESIGN.md`
+
+이 단계에 처음 진입하면 사용자에게 다음 중 하나를 선택하게 한다.
+
+1. 외부에서 사용 중인 `DESIGN.md`를 가져와 사용한다.
+2. 이 하네스 흐름 안에서 `DESIGN.md`를 함께 작성한다.
+
+외부 `DESIGN.md`를 사용하는 경우 해당 파일은 frontmatter나 하네스 템플릿 섹션을 갖지 않을 수 있다.
+이 경우 `codex/runtime/STATE.md`의 `approvals.design.approved`가 `true`이면 완료 조건을 통과할 수 있다.
+
+직접 작성하는 경우 완료 기준은 `codex/workflow/docs-spec.yml`의 `design` 항목을 따른다.
+
+전이 조건은 `docs/DESIGN.md` 완료 또는 `approvals.design.approved` 중 하나를 허용한다.
+
+---
+
+## 7. Feature Implementation
+
+프로젝트 전체 워크플로우가 완료되어 기능 단위 구현으로 진입 가능한 상태다.
+
+이 상태 이후 실제 구현은 다음 기준을 따른다.
+
+- `AGENTS.md`
+- `docs/FEATURE_IMPLEMENTATION_PIPELINE.md`
+- `docs/features/feature-index.md`
+- `docs/features/*/FEAT-XXX-*` 내부 기능 문서
+
+첫 기능 구현을 시작하기 전에는 baseline DB deployment를 확인한다.
+아직 실제 DB 서버에 baseline schema가 배포/검증되지 않았다면 필요한 환경값을 사용자에게 요청하고 배포/검증을 수행한다.
+
+프로젝트 레벨 훅은 기능 구현 세부사항을 판단하지 않는다.
+훅은 프로젝트가 기능 구현 상태에 진입 가능한지만 판단한다.
+
+---
+
+## Template Document Rule
+
+하네스 패키지는 주요 프로젝트 문서를 템플릿 상태로 제공할 수 있다.
+
+템플릿 문서는 존재만으로 완료된 것으로 보지 않는다.
+훅의 전이 검증은 다음 기준을 함께 확인한다.
+
+- frontmatter status
+- 필수 섹션 존재 여부
+- placeholder 제거 여부
+- 최소 내용 충족 여부
+
+현재 하네스 구현 과정에서는 실제 프로젝트의 MVP, 아키텍처, DB, API, 디자인 내용을 작성하지 않는다.
+
+---
+
+## Non-goals
+
+프로젝트 레벨 훅은 다음을 하지 않는다.
+
+- 기능 구현 코드 작성
+- 기능별 테스트 작성
+- 기능별 체크리스트 수행
+- 기능별 설계 세부 판단
+- 커밋/푸쉬/머지 수행
+- 리팩토링 범위 판단
+
+위 작업은 `FEATURE_IMPLEMENTATION` 상태에서 기능 단위 구현 파이프라인이 관리한다.

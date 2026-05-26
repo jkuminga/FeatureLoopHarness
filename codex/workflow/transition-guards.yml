@@ -1,0 +1,59 @@
+version: 1
+
+transitions:
+  MVP_DEFINITION_TO_ARCHITECTURE_DESIGN:
+    from: MVP_DEFINITION
+    to: ARCHITECTURE_DESIGN
+    required_docs:
+      - mvp
+
+  ARCHITECTURE_DESIGN_TO_FEATURE_INDEX_DEFINITION:
+    from: ARCHITECTURE_DESIGN
+    to: FEATURE_INDEX_DEFINITION
+    required_docs:
+      - architecture
+
+  FEATURE_INDEX_DEFINITION_TO_DATA_MODEL_DEFINITION:
+    from: FEATURE_INDEX_DEFINITION
+    to: DATA_MODEL_DEFINITION
+    required_docs:
+      - feature_index
+
+  DATA_MODEL_DEFINITION_TO_API_DESIGN:
+    from: DATA_MODEL_DEFINITION
+    to: API_DESIGN
+    required_docs:
+      - db_schema
+    required_files:
+      - prisma/schema.prisma
+    suggested_commands:
+      - npm run db:validate
+
+  API_DESIGN_TO_FRONTEND_DESIGN:
+    from: API_DESIGN
+    to: FRONTEND_DESIGN
+    required_docs:
+      - api
+
+  FRONTEND_DESIGN_TO_FEATURE_IMPLEMENTATION:
+    from: FRONTEND_DESIGN
+    to: FEATURE_IMPLEMENTATION
+    required_docs:
+      - feature_implementation_pipeline
+    required_docs_any:
+      - design
+    required_approvals_any:
+      - design
+    required_directories:
+      - docs/features/backlog
+      - docs/features/ready
+      - docs/features/active
+      - docs/features/blocked
+      - docs/features/review
+      - docs/features/done
+      - docs/features/postponed
+
+guard_policy:
+  check_all_intermediate_transitions: true
+  file_existence_only_is_insufficient: true
+  document_completion_uses: codex/workflow/docs-spec.yml

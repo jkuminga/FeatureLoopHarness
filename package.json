@@ -1,0 +1,16 @@
+{
+  "name": "harness",
+  "version": "1.0.0",
+  "description": "Codex workflow harness template",
+  "private": true,
+  "license": "ISC",
+  "type": "commonjs",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "python3 -m unittest tests/hooks/test_user_prompt_submit.py",
+    "precommit": "npm test"
+  }
+}
