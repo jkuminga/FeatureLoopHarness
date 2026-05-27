@@ -1,5 +1,7 @@
 # Harness Template
 
+![alt text](FeatureLoopHarness.png)
+
 Codex `UserPromptSubmit` hook과 `AGENTS.md` 규칙으로 실제 프로젝트의 진행 흐름을 제한하는 하네스 템플릿이다.
 
 이 레포는 특정 제품/서비스를 구현하는 레포가 아니라, 실제 프로젝트를 진행할 때 사용할 워크플로우/문서/훅 구조를 제공한다.
