@@ -189,8 +189,13 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         self.assertTrue(result.missing)
         output = self.module.format_codex_output(result)
         self.assertEqual(output["decision"], "block")
+        self.assertIn("[Harness Guard: BLOCKED]", output["reason"])
         self.assertIn("Transition guard check failed", output["reason"])
+        self.assertIn("Request:", output["reason"])
+        self.assertIn("- current_state: MVP_DEFINITION", output["reason"])
+        self.assertIn("Missing requirements:", output["reason"])
         self.assertIn("docs/MVP.md", output["reason"])
+        self.assertIn("Next action:", output["reason"])
 
     def test_transitions_when_required_doc_is_completed(self):
         self.write_completed_doc(

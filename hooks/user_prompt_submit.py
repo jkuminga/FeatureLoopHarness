@@ -860,16 +860,33 @@ def design_selection_additional_prompt(prefix: str | None = None) -> str:
 
 def block_reason(result: HookResult) -> str:
     reason = result.reason or "Harness blocked this request."
-    details = [
-        f"request_type={result.request_type}",
-        f"confidence={result.confidence}",
-        f"current_state={result.current_state}",
+    lines = [
+        "[Harness Guard: BLOCKED]",
+        "",
+        "Codex did not start the requested work because the project workflow guard blocked this prompt.",
+        "",
+        "Reason:",
+        f"- {reason}",
+        "",
+        "Request:",
+        f"- request_type: {result.request_type}",
+        f"- confidence: {result.confidence}",
+        f"- current_state: {result.current_state}",
     ]
     if result.target_state:
-        details.append(f"target_state={result.target_state}")
+        lines.append(f"- target_state: {result.target_state}")
     if result.missing:
-        details.append("missing=" + "; ".join(result.missing))
-    return reason + "\n\n" + "\n".join(details)
+        lines.extend(["", "Missing requirements:"])
+        lines.extend(f"- {item}" for item in result.missing)
+
+    lines.extend(
+        [
+            "",
+            "Next action:",
+            "- Finish the current workflow step first, or ask for current status/next work.",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def format_codex_output(result: HookResult) -> dict[str, Any]:
