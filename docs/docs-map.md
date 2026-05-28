@@ -54,9 +54,3 @@
 - `docs/features/review/`: 최초 구현 초안 완료 후 사용자 검토/수정 중인 기능. 동시에 하나만 허용한다.
 - `docs/features/done/`: 사용자가 최종 완료 승인한 기능
 - `docs/features/postponed/`: 보류 또는 연기된 기능
-
----
-
-## Optional Docs
-
-- `docs/design-docs/core-beliefs.md`: 디자인 관련 참고 문서
