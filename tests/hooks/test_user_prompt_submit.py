@@ -147,7 +147,7 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         self.assertEqual(fallback_unknown.request_type, "UNKNOWN")
 
     def test_unknown_allows_with_additional_prompt_without_state_change(self):
-        result = self.module.handle_prompt("이 구조에 대해 어떻게 생각해?")
+        result = self.module.handle_prompt("이 구조에 대한 의견을 말해줘")
 
         self.assertEqual(result.action, "allow")
         self.assertEqual(result.request_type, "UNKNOWN")
@@ -176,8 +176,75 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         self.assertEqual(result.request_type, "IMPLEMENTATION_REQUEST")
         self.assertEqual(result.confidence, "low")
         self.assertIn("matched_request_types", result.additional_prompt)
+        self.assertIn("multiple or conflicting workflow signals", result.additional_prompt)
         state_text = self.module.STATE_PATH.read_text(encoding="utf-8")
         self.assertIn("current_state: MVP_DEFINITION", state_text)
+
+    def test_question_confirmation_takes_priority_over_mutation_keyword(self):
+        result = self.module.handle_prompt("수정하면 되는거지?")
+
+        self.assertEqual(result.action, "allow")
+        self.assertEqual(result.request_type, "QUESTION_OR_CONFIRMATION_REQUEST")
+        self.assertEqual(result.confidence, "high")
+        self.assertIn("without creating, modifying, or deleting files", result.additional_prompt)
+        state_text = self.module.STATE_PATH.read_text(encoding="utf-8")
+        self.assertIn("current_state: MVP_DEFINITION", state_text)
+
+    def test_question_command_mix_asks_for_clarification(self):
+        result = self.module.handle_prompt("수정하면 되는거지? 앱 수정해줘")
+
+        self.assertEqual(result.action, "allow")
+        self.assertEqual(result.request_type, "IMPLEMENTATION_REQUEST")
+        self.assertEqual(result.confidence, "low")
+        self.assertIn(
+            "QUESTION_OR_CONFIRMATION_REQUEST, IMPLEMENTATION_REQUEST",
+            result.additional_prompt,
+        )
+        self.assertIn("explanation only", result.additional_prompt)
+        state_text = self.module.STATE_PATH.read_text(encoding="utf-8")
+        self.assertIn("current_state: MVP_DEFINITION", state_text)
+
+    def test_question_command_mix_with_specific_mutation_asks_for_clarification(self):
+        result = self.module.handle_prompt("왜 안돼? 파일 수정해줘")
+
+        self.assertEqual(result.action, "allow")
+        self.assertEqual(result.request_type, "IMPLEMENTATION_REQUEST")
+        self.assertEqual(result.confidence, "low")
+        self.assertIn(
+            "QUESTION_OR_CONFIRMATION_REQUEST, IMPLEMENTATION_REQUEST",
+            result.additional_prompt,
+        )
+
+    def test_question_transition_mix_asks_for_clarification(self):
+        result = self.module.handle_prompt("다음 단계로 가면 되나? 다음 단계 넘어")
+
+        self.assertEqual(result.action, "allow")
+        self.assertEqual(result.confidence, "low")
+        self.assertIn("QUESTION_OR_CONFIRMATION_REQUEST", result.additional_prompt)
+
+    def test_question_patterns_are_loaded_from_workflow_config(self):
+        self.module.REQUEST_PATTERNS_PATH.write_text(
+            "\n".join(
+                [
+                    "version: 1",
+                    "question_or_confirmation_patterns:",
+                    "  - custom-question-token",
+                    "patterns:",
+                    "  IMPLEMENTATION_REQUEST:",
+                    "    strong:",
+                    "      - custom-question-token.*수정",
+                    "    aliases: []",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        pure_question = self.module.classify_prompt("custom-question-token")
+        mixed = self.module.classify_prompt("custom-question-token 수정")
+
+        self.assertEqual(pure_question.request_type, "QUESTION_OR_CONFIRMATION_REQUEST")
+        self.assertEqual(mixed.request_type, "IMPLEMENTATION_REQUEST")
+        self.assertEqual(mixed.confidence, "low")
 
     def test_blocks_transition_when_required_doc_is_template(self):
         result = self.module.handle_prompt("아키텍처 설계하자")

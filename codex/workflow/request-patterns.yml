@@ -1,5 +1,27 @@
 version: 1
 
+# Hook-level bypass patterns.
+# These are evaluated before workflow request patterns.
+# Pure question/confirmation prompts are treated as non-mutating requests.
+# If a prompt also contains another workflow intent, the hook treats it as low confidence.
+question_or_confirmation_patterns:
+  - \?
+  - 맞아\??$
+  - 맞나\??$
+  - 되나\??$
+  - 되는거지\??$
+  - 하면 되는거지\??$
+  - 해야 하나\??$
+  - 해도 돼\??$
+  - 괜찮아\??$
+  - "어떻게 생각"
+  - "어때"
+  - "맞을까"
+  - "좋을까"
+  - 수정하면 되는거지\??$
+  - 바꾸면 되는거지\??$
+  - 진행하면 되는거지\??$
+
 patterns:
   PRISMA_BASELINE_CREATE_REQUEST:
     strong:

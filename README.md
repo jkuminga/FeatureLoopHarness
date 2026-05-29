@@ -145,6 +145,9 @@ hook이 실행되지 않거나 block되지 않으면 다음 순서로 확인한�
 request type 분류 패턴은 `codex/workflow/request-patterns.yml`에서 관리한다.
 자연어 alias를 추가할 때는 Python hook script가 아니라 이 설정 파일을 수정한다.
 
+`QUESTION_OR_CONFIRMATION_REQUEST`는 `flow.yml`의 상태 전이 request type이 아니라 hook 내부에서만 사용하는 예외 타입이다.
+질문/확인형 요청은 파일 변경 없는 답변으로 처리하고, 질문/확인형 표현과 실행 의도가 함께 있으면 낮은 confidence로 분류해 사용자 확인을 요구한다.
+
 담당하지 않는 것:
 
 - 기능 구현 세부 절차

@@ -345,6 +345,25 @@ REQUEST_ALIASES: list[tuple[str, list[str]]] = [
     ),
 ]
 
+QUESTION_OR_CONFIRMATION_PATTERNS: list[str] = [
+    r"\?",
+    r"맞아\??$",
+    r"맞나\??$",
+    r"되나\??$",
+    r"되는거지\??$",
+    r"하면 되는거지\??$",
+    r"해야 하나\??$",
+    r"해도 돼\??$",
+    r"괜찮아\??$",
+    r"어떻게 생각",
+    r"어때",
+    r"맞을까",
+    r"좋을까",
+    r"수정하면 되는거지\??$",
+    r"바꾸면 되는거지\??$",
+    r"진행하면 되는거지\??$",
+]
+
 
 def read_prompt() -> str:
     if len(sys.argv) > 1:
@@ -472,6 +491,15 @@ def load_request_patterns() -> tuple[list[tuple[str, list[str]]], list[tuple[str
     return patterns, aliases
 
 
+def load_question_or_confirmation_patterns() -> list[str]:
+    if not REQUEST_PATTERNS_PATH.exists():
+        return QUESTION_OR_CONFIRMATION_PATTERNS
+
+    config = load_yaml(REQUEST_PATTERNS_PATH)
+    patterns = config.get("question_or_confirmation_patterns") or []
+    return list(patterns) if patterns else QUESTION_OR_CONFIRMATION_PATTERNS
+
+
 # markdown frontmatter 파싱
 def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
     if not text.startswith("---"):
@@ -581,8 +609,37 @@ def collect_request_matches(prompt: str) -> dict[str, set[str]]:
     return matches
 
 
+def is_question_or_confirmation(prompt: str) -> bool:
+    normalized = prompt.strip()
+    return any(
+        re.search(pattern, normalized, re.IGNORECASE)
+        for pattern in load_question_or_confirmation_patterns()
+    )
+
+
 def classify_prompt(prompt: str) -> RequestClassification:
+    is_question = is_question_or_confirmation(prompt)
     matches = collect_request_matches(prompt)
+
+    if is_question and matches:
+        priority = request_type_priority()
+        matched_request_types = sorted(matches, key=lambda item: priority.get(item, 999))
+        selected = matched_request_types[0]
+        return RequestClassification(
+            request_type=selected,
+            confidence="low",
+            matched_kinds=["question_or_confirmation", *sorted(matches[selected])],
+            matched_request_types=["QUESTION_OR_CONFIRMATION_REQUEST", *matched_request_types],
+        )
+
+    if is_question:
+        return RequestClassification(
+            request_type="QUESTION_OR_CONFIRMATION_REQUEST",
+            confidence="high",
+            matched_kinds=["question_or_confirmation"],
+            matched_request_types=["QUESTION_OR_CONFIRMATION_REQUEST"],
+        )
+
     if not matches:
         return RequestClassification(
             request_type="UNKNOWN",
@@ -813,16 +870,29 @@ def unknown_additional_prompt() -> str:
     )
 
 
+def question_or_confirmation_additional_prompt() -> str:
+    return (
+        "[Harness Guard]\n"
+        "This request was classified as QUESTION_OR_CONFIRMATION_REQUEST.\n\n"
+        "- Treat it as a question, confirmation, or discussion request.\n"
+        "- Answer directly without creating, modifying, or deleting files.\n"
+        "- Do not update codex/runtime/STATE.md.\n"
+        "- Do not start implementation, tests, commits, state transitions, or feature pipeline work."
+    )
+
+
 def low_confidence_additional_prompt(classification: RequestClassification) -> str:
     return (
         "[Harness Guard]\n"
-        "This request matched multiple workflow request types.\n\n"
+        "This request matched multiple or conflicting workflow signals.\n\n"
         f"- selected_request_type: {classification.request_type}\n"
         f"- confidence: {classification.confidence}\n"
         f"- matched_request_types: {', '.join(classification.matched_request_types)}\n"
+        "- It may combine question/confirmation, design, implementation, test, commit, or transition intent.\n"
         "- Do not create, modify, or delete files.\n"
         "- Do not update codex/runtime/STATE.md.\n"
-        "- Ask the user to clarify the intended workflow request type before proceeding."
+        "- Ask the user to clarify the single intended action before proceeding.\n"
+        "- If the prompt mixes a question with an execution command, ask whether the user wants explanation only or wants Codex to perform the action."
     )
 
 
@@ -940,6 +1010,16 @@ def handle_prompt(prompt: str) -> HookResult:
 
     classification = classify_prompt(prompt)
     request_type = classification.request_type
+
+    if request_type == "QUESTION_OR_CONFIRMATION_REQUEST":
+        return HookResult(
+            action="allow",
+            request_type=request_type,
+            confidence=classification.confidence,
+            current_state=current_state,
+            reason="Question or confirmation requests are allowed without workflow action.",
+            additional_prompt=question_or_confirmation_additional_prompt(),
+        )
 
     if request_type == "UNKNOWN":
         return HookResult(
