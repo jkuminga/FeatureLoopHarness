@@ -16,6 +16,10 @@ status: completed
 
 프로젝트 전체 상태가 `FEATURE_IMPLEMENTATION`이 아닐 경우 이 문서를 실행 규칙으로 적용하지 않는다.
 
+이 파이프라인은 기능의 최초 구현 루프만 다룬다.
+커밋, 머지, 후처리 후 기능 디렉토리를 `docs/features/review/`로 이동하면 이 파이프라인은 종료된다.
+`review/`에 있는 기능의 사용자 수정 요청은 이 문서가 아니라 `AGENTS.md`의 review 규칙을 따른다.
+
 진행 순서:
 
 ```text
@@ -65,8 +69,6 @@ docs/features/
 
 - `active/` 또는 `review/`에 기능 디렉토리가 있으면 새 기능 구현을 시작하지 않는다.
 - `review/`에는 동시에 하나의 기능만 둘 수 있다.
-- `review/`에 기능이 하나 있으면 사용자의 수정 요청은 그 기능을 대상으로 간주한다.
-- `review/` 기능에는 full feature implementation pipeline을 다시 적용하지 않는다.
 
 ---
 
@@ -268,35 +270,6 @@ E2E 검증 이후, 커밋 전에 구현된 기능의 품질 점수를 기록한�
 
 ---
 
-## Review Patch Flow
-
-`docs/features/review/`에 있는 기능은 사용자 검토/수정 단계다.
-
-규칙:
-
-- full feature implementation pipeline을 다시 실행하지 않는다.
-- `review/`에 있는 단일 기능을 현재 수정 대상으로 본다.
-- 사용자 수정 요청은 요청된 변경만 최소 범위로 수행한다.
-- 관련 문서, 관련 코드, 관련 테스트만 수정한다.
-- 필요한 경우 관련 테스트만 실행한다.
-- 변경이 품질 판단에 영향을 주면 기능 디렉토리의 `QUALITY_SCORE.md`와 `docs/QUALITY_SCORE.md`를 갱신한다.
-- 커밋, 머지, `done/` 이동은 사용자가 명시적으로 요청한 경우에만 수행한다.
-
-`review/`에 기능이 여러 개 있으면 작업하지 말고 사용자에게 하나만 남기도록 요청한다.
-
-완료 승인 예시:
-
-```text
-이 기능 완료해줘
-done으로 옮겨줘
-최종 승인
-이제 끝
-```
-
-사용자가 완료를 승인하면 기능 디렉토리를 `docs/features/review/`에서 `docs/features/done/`으로 이동하고 관련 인덱스를 갱신한다.
-
----
-
 ## 5. Feedback Loop
 
 검증 실패 시 다음 루프를 따른다.
@@ -336,6 +309,9 @@ feat(scope): description
 6. `docs/features/feature-index.md`에 review 상태, 요약, 참조 경로를 갱신한다.
 7. `docs/QUALITY_SCORE.md`의 해당 기능 점수와 상세 점수 파일 경로를 갱신한다.
 8. 사용자의 최종 완료 승인이 있기 전까지 `done/`으로 이동하지 않는다.
+
+기능 디렉토리를 `docs/features/review/`로 이동하면 최초 구현 파이프라인은 종료된다.
+이후 사용자 검토/수정 요청은 `AGENTS.md`의 review 규칙을 따른다.
 
 ---
 
