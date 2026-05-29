@@ -197,6 +197,9 @@ worktree: FEAT-001-login
 
 규칙:
 
+- 구현 작업은 `SPEC.md`의 Scope/Non-goals를 준수하고, `CHECKLIST.md`의 작업 항목을 기준으로 순차 진행한다.
+- 구현 중 완료한 작업 항목은 `CHECKLIST.md`에 반영한다.
+- `CHECKLIST.md`에 없는 작업이 필요해지면 코드 수정 전에 `SPEC.md`와 `CHECKLIST.md`를 먼저 갱신한다.
 - 관련 없는 리팩토링을 하지 않는다.
 - 기능 범위를 벗어난 구현을 하지 않는다.
 - 프론트엔드 구현 시 `docs/DESIGN.md`를 참고한다.
