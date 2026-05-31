@@ -8,25 +8,31 @@
 
 ## Runtime
 
-- `codex/runtime/STATE.md`: 현재 프로젝트 워크플로우 상태, 완료 상태, 승인 기록
+- `.flh/runtime/STATE.md`: 현재 프로젝트 워크플로우 상태, 완료 상태, 승인 기록
 
 ---
 
 ## Workflow Config
 
-- `codex/workflow/flow.yml`: 상태 목록, 상태별 허용 request_type, next state
-- `codex/workflow/docs-spec.yml`: 문서별 완료 판정 기준
-- `codex/workflow/transition-guards.yml`: 상태 전이별 guard 조합
-- `codex/workflow/request-patterns.yml`: 사용자 프롬프트를 request_type으로 분류하기 위한 strong/alias 패턴
+- `.flh/workflow/flow.yml`: 상태 목록, 상태별 허용 request_type, next state
+- `.flh/workflow/docs-spec.yml`: 문서별 완료 판정 기준
+- `.flh/workflow/transition-guards.yml`: 상태 전이별 guard 조합
+- `.flh/workflow/request-patterns.yml`: 사용자 프롬프트를 request_type으로 분류하기 위한 strong/alias 패턴
+
+---
+
+## Hook Runtime
+
+- `.codex/hooks/user-prompt-submit.sh`: Codex가 실행하는 얇은 hook wrapper
+- `.flh/hooks/user_prompt_submit.py`: 실제 `UserPromptSubmit` hook 본체
 
 ---
 
 ## Harness Operation Docs
 
-- `docs/PROJECT_WORKFLOW.md`: 하네스가 실제 프로젝트에 적용할 프로젝트 전체 워크플로우 설명
-- `docs/FEATURE_IMPLEMENTATION_PIPELINE.md`: `FEATURE_IMPLEMENTATION` 상태에서만 실행하는 기능 단위 구현 파이프라인
+- `.flh/docs/PROJECT_WORKFLOW.md`: 하네스가 실제 프로젝트에 적용할 프로젝트 전체 워크플로우 설명
+- `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`: `FEATURE_IMPLEMENTATION` 상태에서만 실행하는 기능 단위 구현 파이프라인
 - `docs/QUALITY_SCORE.md`: 기능별 최종 품질 점수 전역 인덱스
-- `OPTIMIZATION_CHECKLIST.md`: 템플릿 배포/운영 전 개선 후보 체크리스트
 - `AGENTS.md`: 에이전트가 반드시 따라야 하는 전역 안전 규칙
 
 ---

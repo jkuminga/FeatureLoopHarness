@@ -30,15 +30,17 @@ from pathlib import Path
 from typing import Any
 
 
-ROOT = Path(__file__).resolve().parents[1]
-STATE_PATH = ROOT / "codex/runtime/STATE.md"
-FLOW_PATH = ROOT / "codex/workflow/flow.yml"
-DOCS_SPEC_PATH = ROOT / "codex/workflow/docs-spec.yml"
-TRANSITION_GUARDS_PATH = ROOT / "codex/workflow/transition-guards.yml"
-REQUEST_PATTERNS_PATH = ROOT / "codex/workflow/request-patterns.yml"
+ROOT = Path(__file__).resolve().parents[2]
+STATE_PATH = ROOT / ".flh/runtime/STATE.md"
+FLOW_PATH = ROOT / ".flh/workflow/flow.yml"
+DOCS_SPEC_PATH = ROOT / ".flh/workflow/docs-spec.yml"
+TRANSITION_GUARDS_PATH = ROOT / ".flh/workflow/transition-guards.yml"
+REQUEST_PATTERNS_PATH = ROOT / ".flh/workflow/request-patterns.yml"
 
 ALLOW_EXIT_CODE = 0
 ERROR_EXIT_CODE = 1
+QUESTION_PREFIXES = ("/q",)
+DOCUMENTATION_PREFIXES = ("/d",)
 
 
 @dataclass
@@ -79,7 +81,7 @@ class RequestClassification:
     matched_request_types: list[str]
 
 
-# Fallback only. The editable source of truth is codex/workflow/request-patterns.yml.
+# Fallback only. The editable source of truth is .flh/workflow/request-patterns.yml.
 REQUEST_PATTERNS: list[tuple[str, list[str]]] = [
     (
         "PRISMA_BASELINE_CREATE_REQUEST",
@@ -617,7 +619,39 @@ def is_question_or_confirmation(prompt: str) -> bool:
     )
 
 
+def starts_with_prefix(prompt: str, prefixes: tuple[str, ...]) -> bool:
+    normalized = prompt.strip()
+    return any(
+        normalized == prefix or normalized.startswith(f"{prefix} ")
+        for prefix in prefixes
+    )
+
+
+def is_merge_command(prompt: str) -> bool:
+    normalized = prompt.strip()
+    return bool(
+        re.search(r"\bmerge\s*(해줘|하자|진행|처리|해|하셈)", normalized, re.IGNORECASE)
+        or re.search(r"머지\s*(해줘|하자|진행|처리|해|하셈)", normalized, re.IGNORECASE)
+    )
+
+
 def classify_prompt(prompt: str) -> RequestClassification:
+    if starts_with_prefix(prompt, QUESTION_PREFIXES):
+        return RequestClassification(
+            request_type="QUESTION_OR_CONFIRMATION_REQUEST",
+            confidence="high",
+            matched_kinds=["prefix"],
+            matched_request_types=["QUESTION_OR_CONFIRMATION_REQUEST"],
+        )
+
+    if starts_with_prefix(prompt, DOCUMENTATION_PREFIXES):
+        return RequestClassification(
+            request_type="DOCUMENTATION_REQUEST",
+            confidence="high",
+            matched_kinds=["prefix"],
+            matched_request_types=["DOCUMENTATION_REQUEST"],
+        )
+
     is_question = is_question_or_confirmation(prompt)
     matches = collect_request_matches(prompt)
 
@@ -862,11 +896,11 @@ def unknown_additional_prompt() -> str:
         "[Harness Guard]\n"
         "This request was classified as UNKNOWN by user_prompt_submit.py.\n\n"
         "- If it can be answered without creating, modifying, or deleting files, proceed.\n"
-        "- If it is a design/documentation request, file changes are allowed only in docs/, codex/runtime/, or codex/workflow/.\n"
+        "- If it is a design/documentation request, file changes are allowed only in docs/ or .flh/.\n"
         "- If it requires code, tests, DB migrations, app/src/apps changes, commits, or state transitions, do not proceed.\n"
         "- Ask the user to clarify the intended workflow request type when the requested action is not clearly documentation-only.\n"
-        "- Do not update codex/runtime/STATE.md.\n"
-        "- Do not run docs/FEATURE_IMPLEMENTATION_PIPELINE.md."
+        "- Do not update .flh/runtime/STATE.md.\n"
+        "- Do not run .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md."
     )
 
 
@@ -874,10 +908,27 @@ def question_or_confirmation_additional_prompt() -> str:
     return (
         "[Harness Guard]\n"
         "This request was classified as QUESTION_OR_CONFIRMATION_REQUEST.\n\n"
+        "- If the prompt starts with /q, treat /q as a control prefix and not as user content.\n"
         "- Treat it as a question, confirmation, or discussion request.\n"
         "- Answer directly without creating, modifying, or deleting files.\n"
-        "- Do not update codex/runtime/STATE.md.\n"
+        "- Do not update .flh/runtime/STATE.md.\n"
         "- Do not start implementation, tests, commits, state transitions, or feature pipeline work."
+    )
+
+
+def documentation_additional_prompt() -> str:
+    return (
+        "[Harness Guard]\n"
+        "This request used /d documentation mode.\n\n"
+        "- Treat /d as a control prefix and not as user content.\n"
+        "- Perform only documentation or harness-maintenance work.\n"
+        "- Allowed write targets: docs/, .flh/, AGENTS.md, README.md.\n"
+        "- Allowed harness-maintenance targets when directly relevant: .codex/, .flh/hooks/, tests/hooks/, .husky/, package.json.\n"
+        "- Do not modify app/, apps/, src/, implementation code, tests/e2e/, Prisma migrations, or DB schema/migration files.\n"
+        "- Do not run .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md as an implementation workflow.\n"
+        "- Do not create worktrees or branches.\n"
+        "- Commit and push are allowed only when the user explicitly asks and all changed files are within the allowed documentation/harness targets.\n"
+        "- Merge is not allowed in /d mode."
     )
 
 
@@ -890,7 +941,7 @@ def low_confidence_additional_prompt(classification: RequestClassification) -> s
         f"- matched_request_types: {', '.join(classification.matched_request_types)}\n"
         "- It may combine question/confirmation, design, implementation, test, commit, or transition intent.\n"
         "- Do not create, modify, or delete files.\n"
-        "- Do not update codex/runtime/STATE.md.\n"
+        "- Do not update .flh/runtime/STATE.md.\n"
         "- Ask the user to clarify the single intended action before proceeding.\n"
         "- If the prompt mixes a question with an execution command, ask whether the user wants explanation only or wants Codex to perform the action."
     )
@@ -919,7 +970,7 @@ def design_selection_additional_prompt(prefix: str | None = None) -> str:
             "1. Import an existing external DESIGN.md into docs/DESIGN.md.",
             "2. Create docs/DESIGN.md together in this workflow.",
             "",
-            "If the user imports an external DESIGN.md, record approval in codex/runtime/STATE.md:",
+            "If the user imports an external DESIGN.md, record approval in .flh/runtime/STATE.md:",
             "approvals.design.approved: true",
             "",
             "Do not treat docs/FRONTEND.md as the workflow artifact.",
@@ -1019,6 +1070,25 @@ def handle_prompt(prompt: str) -> HookResult:
             current_state=current_state,
             reason="Question or confirmation requests are allowed without workflow action.",
             additional_prompt=question_or_confirmation_additional_prompt(),
+        )
+
+    if request_type == "DOCUMENTATION_REQUEST":
+        if is_merge_command(prompt):
+            return HookResult(
+                action="block",
+                request_type=request_type,
+                confidence=classification.confidence,
+                current_state=current_state,
+                reason="Merge is not allowed in /d documentation mode.",
+            )
+
+        return HookResult(
+            action="allow",
+            request_type=request_type,
+            confidence=classification.confidence,
+            current_state=current_state,
+            reason="/d documentation mode allows documentation and harness-maintenance work.",
+            additional_prompt=documentation_additional_prompt(),
         )
 
     if request_type == "UNKNOWN":

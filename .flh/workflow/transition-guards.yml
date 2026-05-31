@@ -56,4 +56,4 @@ transitions:
 guard_policy:
   check_all_intermediate_transitions: true
   file_existence_only_is_insufficient: true
-  document_completion_uses: codex/workflow/docs-spec.yml
+  document_completion_uses: .flh/workflow/docs-spec.yml

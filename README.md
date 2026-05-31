@@ -1,6 +1,6 @@
 # Harness Template
 
-![alt text](FeatureLoopHarness.png)
+![image](https://res.cloudinary.com/dddvvp9de/image/upload/v1780124834/FeatureLoopHarness_zndch9.png)
 
 Codex `UserPromptSubmit` hook과 `AGENTS.md` 규칙으로 실제 프로젝트의 진행 흐름을 제한하는 하네스 템플릿이다.
 
@@ -20,14 +20,14 @@ MVP_DEFINITION
 -> FEATURE_IMPLEMENTATION
 ```
 
-프로젝트 상태는 `codex/runtime/STATE.md`에 저장된다.
+프로젝트 상태는 `.flh/runtime/STATE.md`에 저장된다.
 
 상태 전이와 guard는 다음 파일이 제어한다.
 
-- `codex/workflow/flow.yml`
-- `codex/workflow/docs-spec.yml`
-- `codex/workflow/transition-guards.yml`
-- `codex/workflow/request-patterns.yml`
+- `.flh/workflow/flow.yml`
+- `.flh/workflow/docs-spec.yml`
+- `.flh/workflow/transition-guards.yml`
+- `.flh/workflow/request-patterns.yml`
 
 ## Hook Setup
 
@@ -39,7 +39,10 @@ MVP_DEFINITION
 .codex/config.toml
 .codex/hooks.json
 .codex/hooks/user-prompt-submit.sh
-hooks/user_prompt_submit.py
+.flh/runtime/STATE.md
+.flh/workflow/*.yml
+.flh/docs/*.md
+.flh/hooks/user_prompt_submit.py
 ```
 
 `.codex/config.toml`:
@@ -130,7 +133,7 @@ hook이 실행되지 않거나 block되지 않으면 다음 순서로 확인한�
 
 ## What The Hook Controls
 
-`hooks/user_prompt_submit.py`는 요청 시작 전에 프로젝트 전체 workflow를 gate한다.
+`.flh/hooks/user_prompt_submit.py`는 요청 시작 전에 프로젝트 전체 workflow를 gate한다.
 
 담당:
 
@@ -142,11 +145,16 @@ hook이 실행되지 않거나 block되지 않으면 다음 순서로 확인한�
 - 전이가 불가능하면 요청 block
 - `UNKNOWN` 또는 낮은 confidence 요청에는 추가 context 주입
 
-request type 분류 패턴은 `codex/workflow/request-patterns.yml`에서 관리한다.
+request type 분류 패턴은 `.flh/workflow/request-patterns.yml`에서 관리한다.
 자연어 alias를 추가할 때는 Python hook script가 아니라 이 설정 파일을 수정한다.
 
 `QUESTION_OR_CONFIRMATION_REQUEST`는 `flow.yml`의 상태 전이 request type이 아니라 hook 내부에서만 사용하는 예외 타입이다.
 질문/확인형 요청은 파일 변경 없는 답변으로 처리하고, 질문/확인형 표현과 실행 의도가 함께 있으면 낮은 confidence로 분류해 사용자 확인을 요구한다.
+
+명시 prefix:
+
+- `/q`: 질문 모드. 답변만 허용하고 파일 변경, `STATE.md` 변경, 커밋/푸쉬/머지, 파이프라인 실행을 금지한다.
+- `/d`: 문서 모드. 프로젝트 문서 작업을 기본 허용하고, 사용자가 하네스 유지보수를 명시한 경우에만 `.flh/`, `.codex/`, hook test, package 설정 같은 하네스 파일 수정을 허용한다. 사용자가 명시적으로 요청했고 변경 파일이 허용 범위 안에 있을 때만 커밋/푸쉬를 허용한다. 머지는 허용하지 않는다.
 
 담당하지 않는 것:
 
@@ -161,10 +169,11 @@ request type 분류 패턴은 `codex/workflow/request-patterns.yml`에서 관리
 
 핵심:
 
-- 항상 `codex/runtime/STATE.md`를 먼저 읽는다.
+- 항상 `.flh/runtime/STATE.md`를 먼저 읽는다.
 - `FEATURE_IMPLEMENTATION`이 아니면 기능 구현 파이프라인을 실행하지 않는다.
-- `FEATURE_IMPLEMENTATION`이 아니면 파일 수정은 `docs/`, `codex/runtime/`, `codex/workflow/`로 제한한다.
-- `FEATURE_IMPLEMENTATION`일 때만 `docs/FEATURE_IMPLEMENTATION_PIPELINE.md`를 따른다.
+- `FEATURE_IMPLEMENTATION`이 아니면 파일 수정은 `docs/`, `.flh/runtime/`, `.flh/workflow/`, `.flh/docs/`로 제한한다.
+- `/d` 문서 모드에서는 `AGENTS.md`, `README.md`, `.codex/`, `.flh/hooks/`, `tests/hooks/`, `.husky/`, `package.json` 같은 하네스 유지보수 파일도 명시 요청이 있을 때만 추가로 허용한다.
+- `FEATURE_IMPLEMENTATION`일 때만 `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`를 따른다.
 
 ## Feature Implementation
 
@@ -235,7 +244,7 @@ npm run db:verify
 1. 외부에서 사용 중인 `DESIGN.md`를 가져온다.
 2. 하네스 흐름 안에서 `DESIGN.md`를 직접 작성한다.
 
-외부 `DESIGN.md`는 frontmatter가 없을 수 있으므로, 이 경우 `codex/runtime/STATE.md`에 approval을 기록한다.
+외부 `DESIGN.md`는 frontmatter가 없을 수 있으므로, 이 경우 `.flh/runtime/STATE.md`에 approval을 기록한다.
 
 ```yaml
 approvals:
@@ -271,7 +280,6 @@ docs/features/active/FEAT-XXX-name/QUALITY_SCORE.md
 ## Main Documents
 
 - `AGENTS.md`: Codex 작업 규칙
-- `docs/PROJECT_WORKFLOW.md`: 프로젝트 전체 workflow 설명
-- `docs/FEATURE_IMPLEMENTATION_PIPELINE.md`: 기능 단위 구현 파이프라인
+- `.flh/docs/PROJECT_WORKFLOW.md`: 프로젝트 전체 workflow 설명
+- `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`: 기능 단위 구현 파이프라인
 - `docs/docs-map.md`: 문서/설정 파일 지도
-- `OPTIMIZATION_CHECKLIST.md`: 템플릿 배포/운영 전 개선 후보 체크리스트

@@ -79,7 +79,7 @@ documents:
       - "Accessibility"
 
   feature_implementation_pipeline:
-    path: docs/FEATURE_IMPLEMENTATION_PIPELINE.md
+    path: .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md
     purpose: "Harness operation document for feature-level implementation."
     required_status: completed
     required_sections:

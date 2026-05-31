@@ -130,7 +130,7 @@ DB 변경 규칙:
 실행 시점:
 
 - `docs/features/active/`로 첫 기능을 이동하기 전
-- `codex/runtime/STATE.md`에 `approvals.database_baseline.verified: true`가 없을 때
+- `.flh/runtime/STATE.md`에 `approvals.database_baseline.verified: true`가 없을 때
 
 절차:
 
@@ -140,7 +140,7 @@ DB 변경 규칙:
 4. 비밀값을 docs, feature 문서, `STATE.md`에 기록하지 않는다.
 5. baseline migration을 실제 DB에 적용한다.
 6. 실제 DB 연결과 baseline schema 반영 여부를 검증한다.
-7. 성공하면 `codex/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
+7. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
 
 권장 명령 이름:
 
@@ -177,7 +177,7 @@ approvals:
 규칙:
 
 - 모든 구현 작업은 별도 워크트리에서 진행한다.
-- 첫 기능 구현 전 `codex/runtime/STATE.md`의 `approvals.database_baseline.verified`가 `true`인지 확인한다.
+- 첫 기능 구현 전 `.flh/runtime/STATE.md`의 `approvals.database_baseline.verified`가 `true`인지 확인한다.
 - 아직 baseline DB가 검증되지 않았다면 먼저 `Baseline DB Deployment`를 수행한다.
 - 브랜치 이름은 기능 디렉토리명을 기반으로 한다.
 - 워크트리 이름도 기능 디렉토리명을 기반으로 한다.

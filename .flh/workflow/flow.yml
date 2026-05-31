@@ -65,7 +65,7 @@ states:
       - FEATURE_IMPLEMENTATION
 
   FEATURE_IMPLEMENTATION:
-    description: "Run feature-level implementation using docs/FEATURE_IMPLEMENTATION_PIPELINE.md."
+    description: "Run feature-level implementation using .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md."
     allowed_request_types:
       - FEATURE_PREPARE_REQUEST
       - FEATURE_DESIGN_REQUEST

@@ -21,8 +21,8 @@
 - 디자인 지침 정의
 - 기능 단위 구현 진입
 
-프로젝트 레벨 상태 전이는 `codex/runtime/STATE.md`와 `codex/workflow/*` 설정으로 관리한다.
-기능 단위 구현은 `FEATURE_IMPLEMENTATION` 상태에서만 `docs/FEATURE_IMPLEMENTATION_PIPELINE.md`를 기준으로 진행한다.
+프로젝트 레벨 상태 전이는 `.flh/runtime/STATE.md`와 `.flh/workflow/*` 설정으로 관리한다.
+기능 단위 구현은 `FEATURE_IMPLEMENTATION` 상태에서만 `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`를 기준으로 진행한다.
 
 ---
 
@@ -30,13 +30,13 @@
 
 프로젝트 전체 워크플로우는 다음 파일들이 제어한다.
 
-- `codex/runtime/STATE.md`: 현재 상태, 완료 상태, 승인 기록
-- `codex/workflow/flow.yml`: 상태 목록, 상태별 허용 request_type, next state
-- `codex/workflow/docs-spec.yml`: 문서별 완료 판정 기준
-- `codex/workflow/transition-guards.yml`: 상태 전이별 guard 조합
+- `.flh/runtime/STATE.md`: 현재 상태, 완료 상태, 승인 기록
+- `.flh/workflow/flow.yml`: 상태 목록, 상태별 허용 request_type, next state
+- `.flh/workflow/docs-spec.yml`: 문서별 완료 판정 기준
+- `.flh/workflow/transition-guards.yml`: 상태 전이별 guard 조합
 
 사람이 읽는 설명은 이 문서에 둔다.
-훅이 파싱하는 규칙은 `codex/workflow/*.yml`에 둔다.
+훅이 파싱하는 규칙은 `.flh/workflow/*.yml`에 둔다.
 
 ---
 
@@ -68,7 +68,7 @@ MVP_DEFINITION
 이 문서는 하네스 패키지에서 템플릿으로 제공된다.
 실제 프로젝트가 시작되면 사용자가 해당 프로젝트의 내용으로 채운다.
 
-완료 기준은 `codex/workflow/docs-spec.yml`의 `mvp` 항목을 따른다.
+완료 기준은 `.flh/workflow/docs-spec.yml`의 `mvp` 항목을 따른다.
 
 ---
 
@@ -89,7 +89,7 @@ MVP_DEFINITION
 - 실행 환경
 - 아키텍처 제약사항
 
-완료 기준은 `codex/workflow/docs-spec.yml`의 `architecture` 항목을 따른다.
+완료 기준은 `.flh/workflow/docs-spec.yml`의 `architecture` 항목을 따른다.
 
 ---
 
@@ -106,7 +106,7 @@ MVP_DEFINITION
 
 기능의 실제 진행 상태는 `feature-index.md`가 아니라 `docs/features/*/` 디렉토리 위치를 기준으로 판단한다.
 
-완료 기준은 `codex/workflow/docs-spec.yml`의 `feature_index` 항목을 따른다.
+완료 기준은 `.flh/workflow/docs-spec.yml`의 `feature_index` 항목을 따른다.
 
 ---
 
@@ -130,12 +130,12 @@ MVP_DEFINITION
 목표는 구현을 시작할 수 있을 만큼 데이터 모델 baseline 산출물을 확정하는 것이다.
 
 실제 DB 서버 배포와 검증은 `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
-그 결과는 `codex/runtime/STATE.md`의 `approvals.database_baseline`에 기록한다.
+그 결과는 `.flh/runtime/STATE.md`의 `approvals.database_baseline`에 기록한다.
 
 완료 기준은 다음을 따른다.
 
-- `codex/workflow/docs-spec.yml`의 `db_schema` 항목
-- `codex/workflow/transition-guards.yml`의 `DATA_MODEL_DEFINITION_TO_API_DESIGN` 항목
+- `.flh/workflow/docs-spec.yml`의 `db_schema` 항목
+- `.flh/workflow/transition-guards.yml`의 `DATA_MODEL_DEFINITION_TO_API_DESIGN` 항목
 
 ---
 
@@ -155,7 +155,7 @@ MVP_DEFINITION
 - request/response 규칙
 - 에러 응답 규칙
 
-완료 기준은 `codex/workflow/docs-spec.yml`의 `api` 항목을 따른다.
+완료 기준은 `.flh/workflow/docs-spec.yml`의 `api` 항목을 따른다.
 
 ---
 
@@ -173,9 +173,9 @@ MVP_DEFINITION
 2. 이 하네스 흐름 안에서 `DESIGN.md`를 함께 작성한다.
 
 외부 `DESIGN.md`를 사용하는 경우 해당 파일은 frontmatter나 하네스 템플릿 섹션을 갖지 않을 수 있다.
-이 경우 `codex/runtime/STATE.md`의 `approvals.design.approved`가 `true`이면 완료 조건을 통과할 수 있다.
+이 경우 `.flh/runtime/STATE.md`의 `approvals.design.approved`가 `true`이면 완료 조건을 통과할 수 있다.
 
-직접 작성하는 경우 완료 기준은 `codex/workflow/docs-spec.yml`의 `design` 항목을 따른다.
+직접 작성하는 경우 완료 기준은 `.flh/workflow/docs-spec.yml`의 `design` 항목을 따른다.
 
 전이 조건은 `docs/DESIGN.md` 완료 또는 `approvals.design.approved` 중 하나를 허용한다.
 
@@ -188,7 +188,7 @@ MVP_DEFINITION
 이 상태 이후 실제 구현은 다음 기준을 따른다.
 
 - `AGENTS.md`
-- `docs/FEATURE_IMPLEMENTATION_PIPELINE.md`
+- `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`
 - `docs/features/feature-index.md`
 - `docs/features/*/FEAT-XXX-*` 내부 기능 문서
 
@@ -224,7 +224,8 @@ MVP_DEFINITION
 - 기능별 테스트 작성
 - 기능별 체크리스트 수행
 - 기능별 설계 세부 판단
-- 커밋/푸쉬/머지 수행
+- 일반 workflow 전이 과정에서의 커밋/푸쉬/머지 수행
 - 리팩토링 범위 판단
 
 위 작업은 `FEATURE_IMPLEMENTATION` 상태에서 기능 단위 구현 파이프라인이 관리한다.
+단, `/d` 문서 모드에서 사용자가 명시적으로 요청한 문서/하네스 변경 커밋과 푸쉬는 `AGENTS.md`의 `/d` 예외 규칙을 따른다. 머지는 `/d`에서도 허용하지 않는다.

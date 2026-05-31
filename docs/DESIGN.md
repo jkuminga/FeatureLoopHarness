@@ -9,7 +9,7 @@ status: template
 하네스 자체의 디자인 지침을 작성하지 않는다.
 실제 프로젝트 진행 시 다음 두 방식 중 하나를 선택한다.
 
-- 외부에서 사용 중인 `DESIGN.md`를 이 경로에 가져오고 `codex/runtime/STATE.md`의 `approvals.design.approved`를 `true`로 기록한다.
+- 외부에서 사용 중인 `DESIGN.md`를 이 경로에 가져오고 `.flh/runtime/STATE.md`의 `approvals.design.approved`를 `true`로 기록한다.
 - 이 하네스 흐름 안에서 직접 `DESIGN.md`를 작성하고 `status: completed`로 변경한다.
 
 외부 `DESIGN.md`는 frontmatter가 없을 수 있다.
