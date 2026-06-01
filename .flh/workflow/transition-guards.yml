@@ -25,7 +25,7 @@ transitions:
     required_docs:
       - db_schema
     required_files:
-      - prisma/schema.prisma
+      - app/be/prisma/schema.prisma
     suggested_commands:
       - npm run db:validate
 

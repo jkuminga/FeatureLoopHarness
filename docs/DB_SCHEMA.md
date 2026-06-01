@@ -51,5 +51,7 @@ status: template
 
 {{TODO_PRISMA_BASELINE}}
 
-이 단계에서는 baseline schema와 migration 산출물을 준비한다.
+이 단계에서는 `app/be/prisma/schema.prisma`와 baseline migration 산출물을 준비한다.
+Prisma CLI와 `@prisma/client`는 backend package인 `app/be/package.json`에서 관리한다.
+루트 `package.json`은 필요할 경우 `app/be`의 DB script를 호출하는 forwarding script만 둔다.
 실제 DB 서버 배포와 검증은 첫 기능 구현을 시작하기 전에 `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`의 `Baseline DB Deployment` 단계에서 수행한다.

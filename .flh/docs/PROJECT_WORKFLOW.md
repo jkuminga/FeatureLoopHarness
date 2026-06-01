@@ -57,6 +57,24 @@ MVP_DEFINITION
 
 ---
 
+## Manual Step Skip
+
+사용자는 `/d` 문서 및 하네스 제어 모드를 사용해 프로젝트 workflow 단계를 명시적으로 skip 처리할 수 있다.
+
+skip은 하네스가 자동 판정하지 않는다.
+특정 단계가 현재 프로젝트에 필요 없는지 여부는 사용자가 책임지는 수동 운영 결정이다.
+
+단, 다음 기반 단계는 이후 workflow 신뢰도를 크게 좌우하므로 skip하지 않는다.
+
+- `MVP_DEFINITION`
+- `ARCHITECTURE_DESIGN`
+- `FEATURE_INDEX_DEFINITION`
+
+skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
+필요하면 `.flh/runtime/STATE.md`에 skip한 상태와 이유를 기록한다.
+
+---
+
 ## 1. MVP Definition
 
 실제 프로젝트의 MVP 범위를 정의하는 단계다.
@@ -120,14 +138,18 @@ MVP_DEFINITION
 
 허용되는 예외 작업:
 
-- `prisma/schema.prisma` 생성/수정
-- baseline migration 생성 또는 준비
+- `app/be/package.json` 생성/수정
+- `app/be/prisma/schema.prisma` 생성/수정
+- `app/be/prisma/migrations/**` baseline migration 생성 또는 준비
+- 루트 `package.json`의 DB forwarding script 생성/수정
 
 이 예외는 데이터 모델 baseline을 만들기 위한 작업에만 적용한다.
 앱 기능 구현, API 구현, UI 구현, 기능 테스트 작성은 여전히 금지한다.
 
 이 단계는 실제 DB 서버 배포를 강제하지 않는다.
 목표는 구현을 시작할 수 있을 만큼 데이터 모델 baseline 산출물을 확정하는 것이다.
+Prisma baseline은 루트 `prisma/`가 아니라 backend package인 `app/be/prisma/`에 둔다.
+루트 `package.json`은 하네스와 CI가 공통 명령을 호출할 수 있도록 `app/be`의 DB script를 위임하는 역할만 맡는다.
 
 실제 DB 서버 배포와 검증은 `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
 그 결과는 `.flh/runtime/STATE.md`의 `approvals.database_baseline`에 기록한다.

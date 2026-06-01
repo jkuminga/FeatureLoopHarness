@@ -123,7 +123,7 @@ DB 변경 규칙:
 
 목적:
 
-- `docs/DB_SCHEMA.md`와 `prisma/schema.prisma`로 확정한 baseline schema를 실제 개발 DB에 반영한다.
+- `docs/DB_SCHEMA.md`와 `app/be/prisma/schema.prisma`로 확정한 baseline schema를 실제 개발 DB에 반영한다.
 - 첫 기능 구현부터 실제 DB 연결을 기준으로 개발할 수 있게 한다.
 - DB provider, 환경, 검증 여부를 비밀값 없이 기록한다.
 
@@ -163,6 +163,8 @@ approvals:
 
 규칙:
 
+- Prisma baseline은 backend package인 `app/be/prisma/`를 기준으로 한다.
+- 루트 `db:*` script는 필요하면 `app/be`의 Prisma script로 위임한다.
 - `db:deploy`는 baseline migration을 실제 DB에 적용한다.
 - `db:verify`는 실제 DB 연결, migration 적용 여부, 핵심 테이블 존재 여부를 확인한다.
 - `db:verify`가 실패하면 첫 기능 구현을 시작하지 않는다.

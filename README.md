@@ -78,10 +78,11 @@ hooks = true
 ## First-Time Use
 
 1. 이 템플릿을 git repo 안에서 사용한다.
-2. Codex를 project root에서 실행한다.
-3. Codex에서 `/hooks`를 연다.
-4. `UserPromptSubmit` hook을 review/trust 처리한다.
-5. hook 파일이나 `.codex/hooks.json`을 수정했다면 다시 trust 처리한다.
+2. `npm install`을 실행해 Husky와 lint-staged를 설치하고 Git hook을 연결한다.
+3. Codex를 project root에서 실행한다.
+4. Codex에서 `/hooks`를 연다.
+5. `UserPromptSubmit` hook을 review/trust 처리한다.
+6. hook 파일이나 `.codex/hooks.json`을 수정했다면 다시 trust 처리한다.
 
 검증:
 
@@ -154,7 +155,14 @@ request type 분류 패턴은 `.flh/workflow/request-patterns.yml`에서 관리�
 명시 prefix:
 
 - `/q`: 질문 모드. 답변만 허용하고 파일 변경, `STATE.md` 변경, 커밋/푸쉬/머지, 파이프라인 실행을 금지한다.
-- `/d`: 문서 모드. 프로젝트 문서 작업을 기본 허용하고, 사용자가 하네스 유지보수를 명시한 경우에만 `.flh/`, `.codex/`, hook test, package 설정 같은 하네스 파일 수정을 허용한다. 사용자가 명시적으로 요청했고 변경 파일이 허용 범위 안에 있을 때만 커밋/푸쉬를 허용한다. 머지는 허용하지 않는다.
+- `/d`: 문서 및 하네스 제어 모드. 프로젝트 문서 작업을 기본 허용하고, 사용자가 하네스 유지보수나 workflow 상태 제어를 명시한 경우에만 `.flh/`, `.codex/`, hook test, package 설정, `STATE.md` 같은 하네스 파일 수정을 허용한다. 사용자가 명시적으로 요청했고 변경 파일이 허용 범위 안에 있을 때만 커밋/푸쉬를 허용한다. 머지는 허용하지 않는다.
+
+Manual step skip:
+
+- 사용자는 `/d`를 사용해 프로젝트 workflow 단계를 명시적으로 skip 처리할 수 있다.
+- 하네스는 skip이 도메인상 올바른지 자동 판정하지 않는다. skip은 사용자가 책임지는 수동 운영 결정이다.
+- `MVP_DEFINITION`, `ARCHITECTURE_DESIGN`, `FEATURE_INDEX_DEFINITION`은 이후 workflow의 기반이므로 skip하지 않는다.
+- skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
 
 담당하지 않는 것:
 
@@ -172,7 +180,7 @@ request type 분류 패턴은 `.flh/workflow/request-patterns.yml`에서 관리�
 - 항상 `.flh/runtime/STATE.md`를 먼저 읽는다.
 - `FEATURE_IMPLEMENTATION`이 아니면 기능 구현 파이프라인을 실행하지 않는다.
 - `FEATURE_IMPLEMENTATION`이 아니면 파일 수정은 `docs/`, `.flh/runtime/`, `.flh/workflow/`, `.flh/docs/`로 제한한다.
-- `/d` 문서 모드에서는 `AGENTS.md`, `README.md`, `.codex/`, `.flh/hooks/`, `tests/hooks/`, `.husky/`, `package.json` 같은 하네스 유지보수 파일도 명시 요청이 있을 때만 추가로 허용한다.
+- `/d` 문서 모드에서는 `AGENTS.md`, `README.md`, `.codex/`, `.flh/hooks/`, `tests/hooks/`, `.husky/`, `package.json`, `package-lock.json` 같은 하네스 유지보수 파일도 명시 요청이 있을 때만 추가로 허용한다.
 - `FEATURE_IMPLEMENTATION`일 때만 `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`를 따른다.
 
 ## Feature Implementation
@@ -211,7 +219,9 @@ backlog
 
 ### Baseline DB Deployment
 
-`DATA_MODEL_DEFINITION` 단계는 `docs/DB_SCHEMA.md`, `prisma/schema.prisma`, baseline migration 산출물을 확정하는 단계다.
+`DATA_MODEL_DEFINITION` 단계는 `docs/DB_SCHEMA.md`, `app/be/prisma/schema.prisma`, baseline migration 산출물을 확정하는 단계다.
+Prisma baseline은 기본적으로 backend package인 `app/be` 안에서 관리한다.
+루트 `package.json`은 필요할 경우 `app/be`의 DB 명령을 호출하는 forwarding script만 둔다.
 실제 DB 서버 배포는 첫 기능 구현을 시작하기 전에 한 번 수행한다.
 
 첫 기능을 `active/`로 옮기기 전에 다음을 확인한다.

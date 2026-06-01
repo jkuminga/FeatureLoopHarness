@@ -9,7 +9,7 @@
 ## Prefix Modes
 
 - `/q`: question mode. Answer only. Do not create, modify, delete, commit, push, merge, update `STATE.md`, or run workflow pipelines.
-- `/d`: documentation mode. Documentation and harness-maintenance work is allowed. Commit and push are allowed only when explicitly requested and every changed file is within the allowed documentation/harness targets. Merge is forbidden.
+- `/d`: documentation mode. Documentation, harness-maintenance, and explicit workflow state control are allowed. Commit and push are allowed only when explicitly requested and every changed file is within the allowed documentation/harness targets. Merge is forbidden.
 
 ## File Write Rules
 
@@ -30,6 +30,7 @@ Additional `/d` documentation-mode targets:
 - `tests/hooks/`
 - `.husky/`
 - `package.json`
+- `package-lock.json`
 
 Forbidden outside `FEATURE_IMPLEMENTATION`:
 
@@ -47,9 +48,12 @@ Exceptions:
 
 - In `/d` documentation mode, commit and push are allowed only when the user explicitly requests them and all changed files are limited to the allowed documentation/harness targets.
 - Merge remains forbidden in `/d` documentation mode.
+- In `/d` documentation mode, explicit workflow state skip/transition requests may update `.flh/runtime/STATE.md`, but `MVP_DEFINITION`, `ARCHITECTURE_DESIGN`, and `FEATURE_INDEX_DEFINITION` must not be skipped.
 - In `DATA_MODEL_DEFINITION`, Prisma baseline creation may modify:
-  - `prisma/schema.prisma`
-  - `prisma/migrations/**`
+  - `app/be/package.json`
+  - `app/be/prisma/schema.prisma`
+  - `app/be/prisma/migrations/**`
+  - root `package.json` DB forwarding scripts when needed
 
 ## Feature Implementation
 

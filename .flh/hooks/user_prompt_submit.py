@@ -923,7 +923,7 @@ def documentation_additional_prompt() -> str:
         "- Treat /d as a control prefix and not as user content.\n"
         "- Perform only documentation or harness-maintenance work.\n"
         "- Allowed write targets: docs/, .flh/, AGENTS.md, README.md.\n"
-        "- Allowed harness-maintenance targets when directly relevant: .codex/, .flh/hooks/, tests/hooks/, .husky/, package.json.\n"
+        "- Allowed harness-maintenance targets when directly relevant: .codex/, .flh/hooks/, tests/hooks/, .husky/, package.json, package-lock.json.\n"
         "- Do not modify app/, apps/, src/, implementation code, tests/e2e/, Prisma migrations, or DB schema/migration files.\n"
         "- Do not run .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md as an implementation workflow.\n"
         "- Do not create worktrees or branches.\n"
