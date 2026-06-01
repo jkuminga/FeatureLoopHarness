@@ -1,0 +1,110 @@
+version: 1
+
+usage:
+  rule: "Read only the entry for the current state."
+  purpose: "Short execution checklist for the active project workflow state."
+
+states:
+  MVP_DEFINITION:
+    required_outputs:
+      - docs/MVP.md
+    actions:
+      - Clarify MVP goal, target users, core problem, scope, non-goals, and success criteria.
+      - Update docs/MVP.md.
+      - Mark docs/MVP.md as completed only when the MVP scope is clear.
+    allowed_extra_writes: []
+    ask_user_when:
+      - MVP scope is broad, conflicting, or unclear.
+
+  ARCHITECTURE_DESIGN:
+    required_outputs:
+      - docs/ARCHITECTURE.md
+      - docs/source-layout.yml
+      - source directories listed in docs/source-layout.yml
+    actions:
+      - Decide project type, package manager, runtime stack, and source layout.
+      - Write docs/source-layout.yml.
+      - Create only the directories listed in docs/source-layout.yml.
+      - Add .gitkeep to empty source directories.
+      - Update docs/ARCHITECTURE.md.
+      - Do not scaffold framework code in this state.
+    allowed_extra_writes:
+      - docs/source-layout.yml
+      - app/**/.gitkeep
+      - apps/**/.gitkeep
+      - packages/**/.gitkeep
+    ask_user_when:
+      - Project type or source layout is unclear.
+      - Multiple frontend/backend/package layouts are plausible.
+
+  FEATURE_INDEX_DEFINITION:
+    required_outputs:
+      - docs/features/feature-index.md
+    actions:
+      - Derive feature candidates from MVP and architecture.
+      - Assign feature ID, name, summary, priority, core requirements, dependencies, and reference.
+      - Keep implementation status out of feature-index.md.
+      - Do not create feature SPEC/CHECKLIST/TEST_CASES yet.
+    allowed_extra_writes: []
+    ask_user_when:
+      - Feature priority or MVP fit is unclear.
+
+  DATA_MODEL_DEFINITION:
+    required_outputs:
+      - docs/DB_SCHEMA.md
+      - app/be/prisma/schema.prisma
+    actions:
+      - Confirm backend package and Prisma location from docs/source-layout.yml when available.
+      - Define core entities, relationships, ownership, permissions, ID strategy, lifecycle, and common fields.
+      - Create or update Prisma baseline under app/be/prisma.
+      - Add or update app/be/package.json Prisma dependencies and db scripts when needed.
+      - Add root package.json DB forwarding scripts when needed.
+      - Do not deploy to a real DB server in this state.
+    allowed_extra_writes:
+      - app/be/package.json
+      - app/be/prisma/**
+      - package.json
+    ask_user_when:
+      - Database provider, persistence need, or backend package path is unclear.
+
+  API_DESIGN:
+    required_outputs:
+      - docs/API.md
+    actions:
+      - Define API areas and endpoint draft.
+      - Define authentication, authorization, request/response, and error response rules.
+      - Align API design with feature-index and DB schema when they exist.
+      - Do not implement API routes in this state.
+    allowed_extra_writes: []
+    ask_user_when:
+      - API boundary, auth model, or backend responsibility is unclear.
+
+  FRONTEND_DESIGN:
+    required_outputs:
+      - docs/DESIGN.md
+      - or .flh/runtime/STATE.md approvals.design.approved for external design guide
+    actions:
+      - Ask whether to import an external DESIGN.md or author docs/DESIGN.md.
+      - If authoring, complete docs/DESIGN.md.
+      - If importing, confirm user approval and record non-secret design approval metadata.
+      - Do not implement UI in this state.
+    allowed_extra_writes:
+      - .flh/runtime/STATE.md
+    ask_user_when:
+      - Design source is unclear.
+      - Existing DESIGN.md does not clearly represent the project design guide.
+
+  FEATURE_IMPLEMENTATION:
+    required_outputs:
+      - feature directory under docs/features/*
+    actions:
+      - Use .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md for the first full implementation loop.
+      - Do not start a new feature when docs/features/active or docs/features/review contains a feature directory.
+      - Use AGENTS.md review rules for docs/features/review patch requests.
+      - Verify database baseline before moving the first feature to active when the project uses a DB.
+    allowed_extra_writes:
+      - controlled by AGENTS.md and FEATURE_IMPLEMENTATION_PIPELINE.md
+    ask_user_when:
+      - No feature is selected.
+      - active or review already contains a feature.
+      - database baseline approval is missing for a DB-backed project.

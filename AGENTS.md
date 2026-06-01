@@ -3,6 +3,7 @@
 ## Project Guard
 
 - Always read `.flh/runtime/STATE.md` before deciding what workflow applies.
+- When performing project workflow work, read only the current state's entry from `.flh/workflow/state-actions.yml`.
 - Do not run the feature implementation pipeline unless `current_state` is `FEATURE_IMPLEMENTATION`.
 - When `current_state` is not `FEATURE_IMPLEMENTATION`, only design, documentation, and analysis work is allowed.
 
