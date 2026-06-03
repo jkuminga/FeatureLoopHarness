@@ -117,7 +117,7 @@ DB 변경 규칙:
 
 ---
 
-## Baseline DB Deployment
+## 1.5. Baseline DB Deployment
 
 실제 DB 서버 배포는 프로젝트 전체 `DATA_MODEL_DEFINITION` 단계가 아니라, `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
 
