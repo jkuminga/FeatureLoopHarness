@@ -65,6 +65,9 @@ docs/features/
 `docs/features/feature-index.md`는 기능 목록, 우선순위, 요약을 관리한다.
 기능의 실제 진행 상태는 디렉토리 위치를 source of truth로 본다.
 
+각 기능 디렉토리는 구현 검증 산출물을 저장하기 위해 `artifacts/` 디렉토리를 포함한다.
+비어 있는 `artifacts/` 디렉토리를 유지해야 하면 `artifacts/.gitkeep`을 둔다.
+
 동시성 규칙:
 
 - `active/` 또는 `review/`에 기능 디렉토리가 있으면 새 기능 구현을 시작하지 않는다.
@@ -82,6 +85,8 @@ docs/features/
 - 기능이 존재하지 않으면 `feature-index.md`에 기능 ID, 이름, 요약, 우선순위, 핵심 요구사항을 추가한다.
 - 사용자 요청으로 새로 추가된 기능은 기본 우선순위를 `highest`로 지정한다.
 - 해당 기능 디렉토리가 없으면 `docs/features/backlog/FEAT-XXX-name/`에 생성한다.
+- 기능 디렉토리를 새로 생성할 때 `artifacts/`도 함께 생성한다.
+- 비어 있는 `artifacts/`를 git에 남겨야 하면 `artifacts/.gitkeep`을 생성한다.
 - 이미 `ready/`, `active/`, `blocked/`, `review/`, `done/`, `postponed/` 중 하나에 동일 기능 디렉토리가 있으면 새로 생성하지 않고 기존 디렉토리를 사용한다.
 - `active/` 또는 `review/`에 다른 기능이 있으면 새 기능 준비를 시작하지 않고 먼저 해당 기능을 완료하거나 보류할지 사용자에게 확인한다.
 - `done/`에 있는 기능의 변경 요청이면 새 기능으로 추가할지 기존 기능 개선으로 처리할지 사용자 확인 후 진행한다.
@@ -99,6 +104,10 @@ docs/features/
 - `SPEC.md`: 기능 목표, 범위, 비범위, 흐름, 요구사항, 완료 기준, 제약조건
 - `CHECKLIST.md`: 실제 구현 시 진행할 체크리스트
 - `TEST_CASES.md`: E2E 테스트 파일 생성 시 참고할 테스트 케이스
+
+필수 디렉토리:
+
+- `artifacts/`: 구현 검증 산출물을 저장하는 디렉토리
 
 DB 변경 규칙:
 
