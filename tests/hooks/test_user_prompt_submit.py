@@ -458,6 +458,8 @@ class UserPromptSubmitHookTest(unittest.TestCase):
                     "",
                     "# STATE",
                     "",
+                    "Custom state guide must be preserved.",
+                    "",
                 ]
             )
         )
@@ -472,6 +474,7 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         self.assertIn("    path: docs/DESIGN.md", state_text)
         self.assertIn("    approved: true", state_text)
         self.assertNotIn('approvals: {"design"', state_text)
+        self.assertIn("Custom state guide must be preserved.", state_text)
 
 
 if __name__ == "__main__":

@@ -567,24 +567,70 @@ def append_yaml_value(lines: list[str], key: str, value: Any, indent: int = 0) -
     lines.append(f"{prefix}{key}: {format_yaml_scalar(value)}")
 
 
+def default_state_body() -> str:
+    return "\n".join(
+        [
+            "# STATE",
+            "",
+            "이 파일은 하네스가 적용될 실제 프로젝트의 runtime workflow state를 저장한다.",
+            "기계가 읽는 데이터는 위 YAML frontmatter뿐이며, 이 Markdown 본문은 Codex와 유지보수자를 위한 작성 가이드다.",
+            "",
+            "## Frontmatter Fields",
+            "",
+            "- `current_state`: 현재 프로젝트 workflow 상태.",
+            "- `completed_states`: 완료되었거나 상태 전이 과정에서 통과 처리된 workflow 상태 목록.",
+            "- `approvals`: 이후 hook 또는 agent gate에서 재사용할 승인/검증 기록.",
+            "- `last_transition`: 마지막 상태 전이.",
+            "- `updated_at`: 마지막 runtime state 갱신 시각.",
+            "",
+            "## Approval Recording Policy",
+            "",
+            "`approvals`는 모든 상태 전이마다 기록하는 로그가 아니다.",
+            "문서 완료만으로 판단하기 어렵고, 나중에 hook 또는 agent가 gate 조건으로 다시 확인해야 하는 승인/검증 결과만 기록한다.",
+            "",
+            "Codex는 사용자 승인 또는 실제 검증 없이 approval을 임의로 추가하지 않는다.",
+            "비밀값, API key, token, password, DB connection string은 절대 `STATE.md`에 기록하지 않는다.",
+            "",
+            "### `approvals.design`",
+            "",
+            "외부 `docs/DESIGN.md`를 프로젝트 디자인 가이드로 사용하기로 사용자가 승인한 경우 기록한다.",
+            "",
+            "```yaml",
+            "approvals:",
+            "  design:",
+            "    source: external",
+            "    path: docs/DESIGN.md",
+            "    approved: true",
+            "```",
+            "",
+            "### `approvals.database_baseline`",
+            "",
+            "첫 기능을 `docs/features/active/`로 이동하기 전에 실제 개발 DB baseline 배포와 검증이 성공한 경우 기록한다.",
+            "",
+            "```yaml",
+            "approvals:",
+            "  database_baseline:",
+            "    provider: supabase",
+            "    environment: development",
+            "    deployed: true",
+            "    verified: true",
+            "    verified_at: 2026-05-26T00:00:00Z",
+            "```",
+            "",
+        ]
+    )
+
+
 def write_state(state: dict[str, Any]) -> None:
     lines = ["---"]
     for key in ("current_state", "completed_states", "approvals", "last_transition", "updated_at"):
         append_yaml_value(lines, key, state.get(key))
-    lines.extend(
-        [
-            "---",
-            "",
-            "# STATE",
-            "",
-            "현재 하네스가 적용될 실제 프로젝트의 진행 상태를 저장한다.",
-            "",
-            "이 파일은 하네스 자체의 개발 진행 상태가 아니라, 하네스를 사용해 진행할 실제 프로젝트의 워크플로우 상태를 나타낸다.",
-            "",
-            f"현재 상태는 `{state.get('current_state')}`이다.",
-            "",
-        ]
-    )
+    body = default_state_body()
+    if STATE_PATH.exists():
+        _, existing_body = parse_frontmatter(STATE_PATH.read_text(encoding="utf-8"))
+        if existing_body.strip():
+            body = existing_body.rstrip() + "\n"
+    lines.extend(["---", "", body])
     STATE_PATH.write_text("\n".join(lines), encoding="utf-8")
 
 

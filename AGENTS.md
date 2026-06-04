@@ -7,6 +7,13 @@
 - Follow the current state's `actions`, `allowed_extra_writes`, and `ask_user_when`.
 - Do not perform implementation work unless `current_state` is `FEATURE_IMPLEMENTATION`.
 
+## Runtime State
+
+- Treat `.flh/runtime/STATE.md` frontmatter as the only machine-readable runtime workflow state.
+- When updating `.flh/runtime/STATE.md`, preserve the Markdown body unless the user explicitly asks to change the state guide.
+- When recording `approvals`, follow the approval recording guide in the Markdown body of `.flh/runtime/STATE.md`.
+- Do not record secrets, API keys, tokens, passwords, or connection strings in `.flh/runtime/STATE.md`.
+
 ## Prefix Modes
 
 - `/q`: question mode. Answer only. Do not create, modify, delete, commit, push, merge, update state, or run workflow pipelines.
