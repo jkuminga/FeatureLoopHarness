@@ -106,6 +106,7 @@ skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
 - 기술 스택
 - source layout
 - package layout
+- testing strategy
 - 주요 모듈
 - 데이터 흐름
 - 외부 의존성
@@ -113,9 +114,10 @@ skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
 - scaffold 정책
 - 아키텍처 제약사항
 
-`docs/source-layout.yml`은 아키텍처 단계에서 결정한 source directory를 기계가 읽을 수 있게 기록하는 manifest다.
+`docs/source-layout.yml`은 아키텍처 단계에서 결정한 source directory와 package별 testing tool을 기계가 읽을 수 있게 기록하는 manifest다.
 에이전트는 이 파일에 적힌 source directory만 생성하고, 빈 디렉토리에는 `.gitkeep`만 둔다.
 아키텍처 단계에서는 framework scaffold나 실제 구현 코드를 생성하지 않는다.
+테스트 도구 설치와 설정은 최초 기능 구현 전에 수행하는 source package scaffold baseline에서 다룬다.
 
 완료 기준은 다음을 따른다.
 

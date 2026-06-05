@@ -29,6 +29,7 @@ documents:
       - "Tech Stack"
       - "Source Layout"
       - "Package Layout"
+      - "Testing Strategy"
       - "Modules"
       - "Data Flow"
       - "External Dependencies"
@@ -52,6 +53,7 @@ documents:
       - role
       - package
       - stack
+      - testing
       - scaffold
       - description
 

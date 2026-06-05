@@ -37,6 +37,15 @@ status: template
 
 ---
 
+## Testing Strategy
+
+{{TODO_TESTING_STRATEGY}}
+
+단위, 통합, E2E, 컴포넌트 테스트 도구를 source package별로 결정한다.
+이 결정은 `docs/source-layout.yml`의 `source_roots.*.testing`에도 기계가 읽을 수 있는 형태로 기록한다.
+
+---
+
 ## Modules
 
 {{TODO_MODULES}}

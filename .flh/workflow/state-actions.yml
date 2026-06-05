@@ -22,8 +22,9 @@ states:
       - docs/source-layout.yml
       - source directories listed in docs/source-layout.yml
     actions:
-      - Decide project type, package manager, runtime stack, and source layout.
+      - Decide project type, package manager, runtime stack, testing tools, and source layout.
       - Write docs/source-layout.yml.
+      - Record package-level testing tools in docs/source-layout.yml.
       - Create only the directories listed in docs/source-layout.yml.
       - Add .gitkeep to empty source directories.
       - Update docs/ARCHITECTURE.md.
@@ -35,6 +36,7 @@ states:
       - packages/**/.gitkeep
     ask_user_when:
       - Project type or source layout is unclear.
+      - Unit, integration, E2E, or component testing tools are unclear.
       - Multiple frontend/backend/package layouts are plausible.
 
   FEATURE_INDEX_DEFINITION:

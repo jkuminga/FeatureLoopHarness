@@ -19,6 +19,7 @@
 - `/q`: question mode. Answer only. Do not create, modify, delete, commit, push, merge, update state, or run workflow pipelines.
 - `/d`: documentation and harness-control mode.
 - `/d` may modify only documentation and harness-maintenance targets: `docs/`, `.flh/`, `AGENTS.md`, `README.md`, `.codex/`, `tests/hooks/`, `.husky/`, `package.json`, `package-lock.json`.
+- When editing package scripts, test config, or lint-staged config for the harness, target source extensions only; do not include design/harness document extensions such as `md`, `yml`, or `yaml` unless explicitly requested.
 - `/d` may commit or push only when the user explicitly requests it and every changed file is within the allowed documentation/harness targets.
 - `/d` must not merge.
 - `/d` may perform explicit workflow state skip/transition requests.

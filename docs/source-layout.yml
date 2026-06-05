@@ -12,5 +12,10 @@ source_roots:
     role: "{{TODO_ROLE}}"
     package: "{{TODO_PACKAGE}}"
     stack: "{{TODO_STACK}}"
+    testing:
+      unit: "{{TODO_UNIT_TEST_TOOL}}"
+      integration: "{{TODO_INTEGRATION_TEST_TOOL_OR_NONE}}"
+      e2e: "{{TODO_E2E_TEST_TOOL_OR_NONE}}"
+      component: "{{TODO_COMPONENT_TEST_TOOL_OR_NONE}}"
     scaffold: "{{TODO_SCAFFOLD_POLICY}}"
     description: "{{TODO_DESCRIPTION}}"
