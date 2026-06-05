@@ -63,6 +63,57 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("\n".join(body), encoding="utf-8")
 
+    def write_completed_source_layout(self):
+        target = self.root / "docs/source-layout.yml"
+        target.write_text(
+            "\n".join(
+                [
+                    "version: 1",
+                    "status: completed",
+                    "",
+                    "project:",
+                    "  type: web-app",
+                    "  package_manager: npm",
+                    "  runtime: node",
+                    "",
+                    "source_roots:",
+                    "  frontend:",
+                    "    path: app/fe",
+                    "    role: frontend",
+                    "    package: true",
+                    "    stack: react-vite",
+                    "    scaffold: gitkeep-only",
+                    "    description: Frontend application package directory.",
+                    "  backend:",
+                    "    path: app/be",
+                    "    role: backend",
+                    "    package: true",
+                    "    stack: node-api-prisma",
+                    "    scaffold: gitkeep-only",
+                    "    description: Backend application package directory.",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+    def write_completed_architecture_doc(self):
+        self.write_completed_doc(
+            "docs/ARCHITECTURE.md",
+            [
+                "System Overview",
+                "Tech Stack",
+                "Source Layout",
+                "Package Layout",
+                "Modules",
+                "Data Flow",
+                "External Dependencies",
+                "Runtime Environment",
+                "Scaffold Policy",
+                "Constraints",
+            ],
+        )
+
     def write_state(self, text):
         self.module.STATE_PATH.write_text(text, encoding="utf-8")
 
@@ -350,6 +401,53 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         state_text = self.module.STATE_PATH.read_text(encoding="utf-8")
         self.assertIn("current_state: ARCHITECTURE_DESIGN", state_text)
         self.assertIn("  - MVP_DEFINITION", state_text)
+
+    def test_source_layout_yaml_requires_completed_manifest(self):
+        docs_spec = self.module.load_yaml(self.module.DOCS_SPEC_PATH)
+
+        template_ok, template_failures = self.module.doc_is_complete("source_layout", docs_spec)
+        self.assertFalse(template_ok)
+        self.assertTrue(any("status is not completed" in item for item in template_failures))
+
+        self.write_completed_source_layout()
+        completed_ok, completed_failures = self.module.doc_is_complete("source_layout", docs_spec)
+        self.assertTrue(completed_ok, completed_failures)
+
+    def test_architecture_to_feature_index_requires_source_layout_directories(self):
+        self.write_state(
+            "\n".join(
+                [
+                    "---",
+                    "current_state: ARCHITECTURE_DESIGN",
+                    "completed_states:",
+                    "  - MVP_DEFINITION",
+                    "approvals: {}",
+                    "last_transition: MVP_DEFINITION -> ARCHITECTURE_DESIGN",
+                    "updated_at: null",
+                    "---",
+                    "",
+                    "# STATE",
+                    "",
+                ]
+            )
+        )
+        self.write_completed_architecture_doc()
+
+        missing_manifest = self.module.handle_prompt("기능 목록 정리해줘")
+        self.assertEqual(missing_manifest.action, "block")
+        self.assertIn("docs/source-layout.yml", "\n".join(missing_manifest.missing or []))
+
+        self.write_completed_source_layout()
+        missing_directories = self.module.handle_prompt("기능 목록 정리해줘")
+        self.assertEqual(missing_directories.action, "block")
+        self.assertIn("Missing source layout directory: app/fe", missing_directories.missing)
+        self.assertIn("Missing source layout directory: app/be", missing_directories.missing)
+
+        (self.root / "app/fe").mkdir(parents=True)
+        (self.root / "app/be").mkdir(parents=True)
+        allowed = self.module.handle_prompt("기능 목록 정리해줘")
+        self.assertEqual(allowed.action, "allow")
+        self.assertEqual(allowed.updated_state, "FEATURE_INDEX_DEFINITION")
 
     def test_frontend_to_feature_implementation_accepts_design_approval(self):
         self.write_state(

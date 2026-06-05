@@ -26,11 +26,34 @@ documents:
     purpose: "Template completed by the actual project to define system architecture."
     required_sections:
       - "System Overview"
+      - "Tech Stack"
+      - "Source Layout"
+      - "Package Layout"
       - "Modules"
       - "Data Flow"
       - "External Dependencies"
       - "Runtime Environment"
+      - "Scaffold Policy"
       - "Constraints"
+
+  source_layout:
+    path: docs/source-layout.yml
+    format: yaml
+    purpose: "Machine-readable source layout manifest generated during architecture design."
+    required_status: completed
+    required_yaml_fields:
+      - project.type
+      - project.package_manager
+      - project.runtime
+      - source_roots
+    required_yaml_mapping: source_roots
+    required_yaml_mapping_item_fields:
+      - path
+      - role
+      - package
+      - stack
+      - scaffold
+      - description
 
   feature_index:
     path: docs/features/feature-index.md

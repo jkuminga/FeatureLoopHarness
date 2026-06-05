@@ -32,6 +32,7 @@
 
 - `.flh/runtime/STATE.md`: 현재 상태, 완료 상태, 승인 기록
 - `.flh/workflow/flow.yml`: 상태 목록, 상태별 허용 request_type, next state
+- `.flh/workflow/state-actions.yml`: 현재 상태에서 에이전트가 수행할 짧은 체크리스트와 허용 write 범위
 - `.flh/workflow/docs-spec.yml`: 문서별 완료 판정 기준
 - `.flh/workflow/transition-guards.yml`: 상태 전이별 guard 조합
 
@@ -97,17 +98,30 @@ skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
 템플릿 문서:
 
 - `docs/ARCHITECTURE.md`
+- `docs/source-layout.yml`
 
 포함해야 하는 대표 항목:
 
 - 시스템 개요
+- 기술 스택
+- source layout
+- package layout
 - 주요 모듈
 - 데이터 흐름
 - 외부 의존성
 - 실행 환경
+- scaffold 정책
 - 아키텍처 제약사항
 
-완료 기준은 `.flh/workflow/docs-spec.yml`의 `architecture` 항목을 따른다.
+`docs/source-layout.yml`은 아키텍처 단계에서 결정한 source directory를 기계가 읽을 수 있게 기록하는 manifest다.
+에이전트는 이 파일에 적힌 source directory만 생성하고, 빈 디렉토리에는 `.gitkeep`만 둔다.
+아키텍처 단계에서는 framework scaffold나 실제 구현 코드를 생성하지 않는다.
+
+완료 기준은 다음을 따른다.
+
+- `.flh/workflow/docs-spec.yml`의 `architecture` 항목
+- `.flh/workflow/docs-spec.yml`의 `source_layout` 항목
+- `.flh/workflow/transition-guards.yml`의 `ARCHITECTURE_DESIGN_TO_FEATURE_INDEX_DEFINITION` 항목
 
 ---
 

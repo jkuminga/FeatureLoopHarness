@@ -806,6 +806,80 @@ def markdown_table_headers(text: str) -> list[str]:
     return []
 
 
+def value_is_present(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (list, dict)):
+        return bool(value)
+    return True
+
+
+def nested_yaml_value(data: dict[str, Any], dotted_path: str) -> Any:
+    current: Any = data
+    for part in dotted_path.split("."):
+        if not isinstance(current, dict) or part not in current:
+            return None
+        current = current[part]
+    return current
+
+
+def yaml_doc_is_complete(
+    candidate: str,
+    text: str,
+    doc_config: dict[str, Any],
+    defaults: dict[str, Any],
+) -> tuple[bool, list[str]]:
+    failures: list[str] = []
+
+    try:
+        data = parse_yaml_subset(text)
+    except ValueError as error:
+        return False, [f"{candidate}: invalid YAML: {error}"]
+
+    required_status = doc_config.get("required_status", defaults.get("required_status"))
+    if required_status and data.get("status") != required_status:
+        failures.append(f"{candidate}: status is not {required_status}")
+
+    forbidden_tokens = doc_config.get("forbidden_tokens", defaults.get("forbidden_tokens", []))
+    found_token = next((token for token in forbidden_tokens if token in text), None)
+    if found_token:
+        failures.append(f"{candidate}: forbidden token remains: {found_token}")
+
+    missing_fields = [
+        field
+        for field in doc_config.get("required_yaml_fields", []) or []
+        if not value_is_present(nested_yaml_value(data, field))
+    ]
+    if missing_fields:
+        failures.append(f"{candidate}: missing YAML fields: {', '.join(missing_fields)}")
+
+    mapping_key = doc_config.get("required_yaml_mapping")
+    if mapping_key:
+        mapping = nested_yaml_value(data, str(mapping_key))
+        if not isinstance(mapping, dict) or not mapping:
+            failures.append(f"{candidate}: {mapping_key} is missing or empty")
+        else:
+            item_fields = doc_config.get("required_yaml_mapping_item_fields", []) or []
+            for item_key, item in mapping.items():
+                if not isinstance(item, dict):
+                    failures.append(f"{candidate}: {mapping_key}.{item_key} must be a mapping")
+                    continue
+                missing_item_fields = [
+                    field
+                    for field in item_fields
+                    if not value_is_present(item.get(field))
+                ]
+                if missing_item_fields:
+                    failures.append(
+                        f"{candidate}: {mapping_key}.{item_key} missing fields: "
+                        + ", ".join(missing_item_fields)
+                    )
+
+    return not failures, failures
+
+
 def doc_is_complete(doc_key: str, docs_spec: dict[str, Any]) -> tuple[bool, list[str]]:
     defaults = docs_spec.get("defaults", {})
     doc_config = docs_spec.get("documents", {}).get(doc_key)
@@ -824,6 +898,13 @@ def doc_is_complete(doc_key: str, docs_spec: dict[str, Any]) -> tuple[bool, list
             continue
 
         text = path.read_text(encoding="utf-8")
+        if doc_config.get("format") == "yaml":
+            ok, yaml_failures = yaml_doc_is_complete(candidate, text, doc_config, defaults)
+            if ok:
+                return True, []
+            failures.extend(yaml_failures)
+            continue
+
         frontmatter, body = parse_frontmatter(text)
         required_status = doc_config.get("required_status", defaults.get("required_status"))
         if required_status and frontmatter.get("status") != required_status:
@@ -869,6 +950,57 @@ def doc_is_complete(doc_key: str, docs_spec: dict[str, Any]) -> tuple[bool, list
         return True, []
 
     return False, failures
+
+
+def source_layout_directory_paths(
+    doc_key: str,
+    docs_spec: dict[str, Any],
+) -> tuple[list[str], list[str]]:
+    ok, failures = doc_is_complete(doc_key, docs_spec)
+    if not ok:
+        return [], failures
+
+    doc_config = docs_spec.get("documents", {}).get(doc_key)
+    if not doc_config:
+        return [], [f"Unknown docs-spec document key: {doc_key}"]
+
+    rel_path = doc_config.get("path")
+    if not rel_path:
+        return [], [f"{doc_key}: docs-spec path is missing"]
+
+    path = ROOT / rel_path
+    if not path.exists():
+        return [], [f"Missing document: {rel_path}"]
+
+    try:
+        data = load_yaml(path)
+    except (FileNotFoundError, ValueError) as error:
+        return [], [f"{rel_path}: {error}"]
+
+    source_roots = data.get("source_roots")
+    if not isinstance(source_roots, dict) or not source_roots:
+        return [], [f"{rel_path}: source_roots is missing or empty"]
+
+    paths: list[str] = []
+    failures: list[str] = []
+    for source_key, source_config in source_roots.items():
+        if not isinstance(source_config, dict):
+            failures.append(f"{rel_path}: source_roots.{source_key} must be a mapping")
+            continue
+
+        source_path = source_config.get("path")
+        if not isinstance(source_path, str) or not source_path.strip():
+            failures.append(f"{rel_path}: source_roots.{source_key}.path is missing")
+            continue
+
+        normalized = Path(source_path)
+        if normalized.is_absolute() or ".." in normalized.parts:
+            failures.append(f"{rel_path}: invalid source path outside repo: {source_path}")
+            continue
+
+        paths.append(source_path.strip())
+
+    return paths, failures
 
 
 def approval_is_granted(approval_key: str, state_data: dict[str, Any]) -> bool:
@@ -933,6 +1065,13 @@ def check_transition_guards(
         for rel_path in guard.get("required_directories", []) or []:
             if not (ROOT / rel_path).is_dir():
                 missing.append(f"Missing required directory: {rel_path}")
+
+        for doc_key in guard.get("required_source_layout_directories", []) or []:
+            source_paths, failures = source_layout_directory_paths(doc_key, docs_spec)
+            missing.extend(failures)
+            for rel_path in source_paths:
+                if not (ROOT / rel_path).is_dir():
+                    missing.append(f"Missing source layout directory: {rel_path}")
 
     return not missing, missing
 

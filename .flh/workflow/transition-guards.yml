@@ -12,6 +12,8 @@ transitions:
     to: FEATURE_INDEX_DEFINITION
     required_docs:
       - architecture
+    required_source_layout_directories:
+      - source_layout
 
   FEATURE_INDEX_DEFINITION_TO_DATA_MODEL_DEFINITION:
     from: FEATURE_INDEX_DEFINITION

@@ -14,7 +14,7 @@ states:
       - ARCHITECTURE_DESIGN
 
   ARCHITECTURE_DESIGN:
-    description: "Define the actual project's system architecture using docs/ARCHITECTURE.md."
+    description: "Define the actual project's system architecture and source layout using docs/ARCHITECTURE.md and docs/source-layout.yml."
     allowed_request_types:
       - ARCHITECTURE_DESIGN_REQUEST
       - STATE_STATUS_REQUEST

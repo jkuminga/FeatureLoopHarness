@@ -15,6 +15,7 @@
 ## Workflow Config
 
 - `.flh/workflow/flow.yml`: 상태 목록, 상태별 허용 request_type, next state
+- `.flh/workflow/state-actions.yml`: 현재 상태에서 에이전트가 수행할 짧은 체크리스트와 허용 write 범위
 - `.flh/workflow/docs-spec.yml`: 문서별 완료 판정 기준
 - `.flh/workflow/transition-guards.yml`: 상태 전이별 guard 조합
 - `.flh/workflow/request-patterns.yml`: 사용자 프롬프트를 request_type으로 분류하기 위한 strong/alias 패턴
@@ -44,6 +45,7 @@
 
 - `docs/MVP.md`: 실제 프로젝트의 MVP 정의 템플릿
 - `docs/ARCHITECTURE.md`: 실제 프로젝트의 시스템 아키텍처 템플릿
+- `docs/source-layout.yml`: 아키텍처 단계에서 결정한 source directory manifest 템플릿
 - `docs/features/feature-index.md`: 실제 프로젝트의 기능 목록 템플릿
 - `docs/DB_SCHEMA.md`: 실제 프로젝트의 데이터 모델 baseline 템플릿
 - `docs/API.md`: 실제 프로젝트의 API 설계 템플릿

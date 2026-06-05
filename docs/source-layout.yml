@@ -1,0 +1,16 @@
+version: 1
+status: template
+
+project:
+  type: "{{TODO_PROJECT_TYPE}}"
+  package_manager: "{{TODO_PACKAGE_MANAGER}}"
+  runtime: "{{TODO_RUNTIME}}"
+
+source_roots:
+  example:
+    path: "{{TODO_SOURCE_PATH}}"
+    role: "{{TODO_ROLE}}"
+    package: "{{TODO_PACKAGE}}"
+    stack: "{{TODO_STACK}}"
+    scaffold: "{{TODO_SCAFFOLD_POLICY}}"
+    description: "{{TODO_DESCRIPTION}}"

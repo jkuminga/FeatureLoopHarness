@@ -17,6 +17,26 @@ status: template
 
 ---
 
+## Tech Stack
+
+{{TODO_TECH_STACK}}
+
+---
+
+## Source Layout
+
+{{TODO_SOURCE_LAYOUT}}
+
+이 섹션의 결정은 `docs/source-layout.yml`에도 기계가 읽을 수 있는 형태로 기록한다.
+
+---
+
+## Package Layout
+
+{{TODO_PACKAGE_LAYOUT}}
+
+---
+
 ## Modules
 
 {{TODO_MODULES}}
@@ -41,7 +61,15 @@ status: template
 
 ---
 
+## Scaffold Policy
+
+{{TODO_SCAFFOLD_POLICY}}
+
+아키텍처 단계에서는 필요한 source directory와 `.gitkeep`만 생성한다.
+프레임워크 scaffold와 실제 구현 코드는 기능 구현 단계에서 다룬다.
+
+---
+
 ## Constraints
 
 {{TODO_CONSTRAINTS}}
-

@@ -25,6 +25,7 @@ MVP_DEFINITION
 상태 전이와 guard는 다음 파일이 제어한다.
 
 - `.flh/workflow/flow.yml`
+- `.flh/workflow/state-actions.yml`
 - `.flh/workflow/docs-spec.yml`
 - `.flh/workflow/transition-guards.yml`
 - `.flh/workflow/request-patterns.yml`
@@ -41,8 +42,9 @@ MVP_DEFINITION
 .codex/hooks/user-prompt-submit.sh
 .flh/runtime/STATE.md
 .flh/workflow/*.yml
-.flh/docs/*.md
 .flh/hooks/user_prompt_submit.py
+docs/source-layout.yml
+.flh/docs/*.md
 ```
 
 `.codex/config.toml`:
@@ -178,9 +180,10 @@ Manual step skip:
 핵심:
 
 - 항상 `.flh/runtime/STATE.md`를 먼저 읽는다.
+- 프로젝트 workflow 작업은 현재 상태에 해당하는 `.flh/workflow/state-actions.yml` 항목만 읽는다.
+- 현재 상태의 `actions`, `allowed_extra_writes`, `ask_user_when`을 따른다.
 - `FEATURE_IMPLEMENTATION`이 아니면 기능 구현 파이프라인을 실행하지 않는다.
-- `FEATURE_IMPLEMENTATION`이 아니면 파일 수정은 `docs/`, `.flh/runtime/`, `.flh/workflow/`, `.flh/docs/`로 제한한다.
-- `/d` 문서 모드에서는 `AGENTS.md`, `README.md`, `.codex/`, `.flh/hooks/`, `tests/hooks/`, `.husky/`, `package.json`, `package-lock.json` 같은 하네스 유지보수 파일도 명시 요청이 있을 때만 추가로 허용한다.
+- `/d` 문서 모드에서는 `docs/`, `.flh/`, `AGENTS.md`, `README.md`, `.codex/`, `tests/hooks/`, `.husky/`, `package.json`, `package-lock.json` 같은 문서/하네스 유지보수 파일만 수정한다.
 - `FEATURE_IMPLEMENTATION`일 때만 `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`를 따른다.
 
 ## Feature Implementation
