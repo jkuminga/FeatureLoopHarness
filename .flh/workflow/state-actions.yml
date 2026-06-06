@@ -23,8 +23,10 @@ states:
       - source directories listed in docs/source-layout.yml
     actions:
       - Decide project type, package manager, runtime stack, testing tools, and source layout.
+      - Use docs/source-layout.yml as the required architecture decision checklist.
+      - Ask the user for any missing docs/source-layout.yml fields before marking architecture completed.
       - Write docs/source-layout.yml.
-      - Record package-level testing tools in docs/source-layout.yml.
+      - Record package-level framework, runtime, language, module, testing, and tooling decisions in docs/source-layout.yml.
       - Create only the directories listed in docs/source-layout.yml.
       - Add .gitkeep to empty source directories.
       - Update docs/ARCHITECTURE.md.
@@ -35,8 +37,9 @@ states:
       - apps/**/.gitkeep
       - packages/**/.gitkeep
     ask_user_when:
-      - Project type or source layout is unclear.
+      - Project type, workspace policy, package manager, runtime, language, module, or source layout is unclear.
       - Unit, integration, E2E, or component testing tools are unclear.
+      - Lint or format tooling is unclear.
       - Multiple frontend/backend/package layouts are plausible.
 
   FEATURE_INDEX_DEFINITION:

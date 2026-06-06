@@ -4,6 +4,7 @@ status: template
 project:
   type: "{{TODO_PROJECT_TYPE}}"
   package_manager: "{{TODO_PACKAGE_MANAGER}}"
+  workspace: "{{TODO_WORKSPACE_TRUE_OR_FALSE}}"
   runtime: "{{TODO_RUNTIME}}"
 
 source_roots:
@@ -12,10 +13,17 @@ source_roots:
     role: "{{TODO_ROLE}}"
     package: "{{TODO_PACKAGE}}"
     stack: "{{TODO_STACK}}"
+    framework: "{{TODO_FRAMEWORK_OR_NONE}}"
+    runtime: "{{TODO_PACKAGE_RUNTIME}}"
+    language: "{{TODO_LANGUAGE}}"
+    module: "{{TODO_MODULE_SYSTEM}}"
     testing:
       unit: "{{TODO_UNIT_TEST_TOOL}}"
       integration: "{{TODO_INTEGRATION_TEST_TOOL_OR_NONE}}"
       e2e: "{{TODO_E2E_TEST_TOOL_OR_NONE}}"
       component: "{{TODO_COMPONENT_TEST_TOOL_OR_NONE}}"
+    tooling:
+      lint: "{{TODO_LINT_TOOL_OR_NONE}}"
+      format: "{{TODO_FORMAT_TOOL_OR_NONE}}"
     scaffold: "{{TODO_SCAFFOLD_POLICY}}"
     description: "{{TODO_DESCRIPTION}}"

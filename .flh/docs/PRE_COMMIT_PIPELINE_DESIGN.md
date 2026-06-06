@@ -60,8 +60,15 @@ docs/source-layout.yml
 필수 조건:
 
 - `status: completed`
+- `project.workspace`
 - `source_roots.*.path`
 - `source_roots.*.package`
+- `source_roots.*.framework`
+- `source_roots.*.runtime`
+- `source_roots.*.language`
+- `source_roots.*.module`
+- `source_roots.*.testing`
+- `source_roots.*.tooling`
 
 예시:
 
@@ -72,6 +79,7 @@ status: completed
 project:
   type: web-app
   package_manager: npm
+  workspace: true
   runtime: node
 
 source_roots:
@@ -80,11 +88,18 @@ source_roots:
     role: frontend
     package: true
     stack: react-vite
+    framework: vite
+    runtime: react
+    language: typescript
+    module: esm
     testing:
       unit: vitest
       integration: none
       e2e: playwright
       component: testing-library
+    tooling:
+      lint: eslint
+      format: prettier
     scaffold: gitkeep-only
     description: Frontend package.
   backend:
@@ -92,11 +107,18 @@ source_roots:
     role: backend
     package: true
     stack: node-api-prisma
+    framework: express
+    runtime: node
+    language: typescript
+    module: esm
     testing:
       unit: vitest
       integration: vitest
       e2e: none
       component: none
+    tooling:
+      lint: eslint
+      format: prettier
     scaffold: gitkeep-only
     description: Backend package.
 ```

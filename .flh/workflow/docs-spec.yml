@@ -45,6 +45,7 @@ documents:
     required_yaml_fields:
       - project.type
       - project.package_manager
+      - project.workspace
       - project.runtime
       - source_roots
     required_yaml_mapping: source_roots
@@ -53,7 +54,12 @@ documents:
       - role
       - package
       - stack
+      - framework
+      - runtime
+      - language
+      - module
       - testing
+      - tooling
       - scaffold
       - description
 

@@ -28,6 +28,7 @@ status: template
 {{TODO_SOURCE_LAYOUT}}
 
 이 섹션의 결정은 `docs/source-layout.yml`에도 기계가 읽을 수 있는 형태로 기록한다.
+`docs/source-layout.yml`은 아키텍처 단계에서 사용자에게 확인해야 하는 필수 결정 체크리스트로 사용한다.
 
 ---
 
