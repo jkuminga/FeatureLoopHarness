@@ -105,11 +105,15 @@ states:
     actions:
       - Use .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md for the first full implementation loop.
       - Do not start a new feature when docs/features/active or docs/features/review contains a feature directory.
+      - Verify source package scaffold baseline before creating the first feature branch/worktree.
+      - If source scaffold approval is missing, run Source Package Scaffold Baseline before DB deployment and feature work.
       - Use AGENTS.md review rules for docs/features/review patch requests.
-      - Verify database baseline before moving the first feature to active when the project uses a DB.
+      - Verify database baseline after scaffold baseline and before moving the first DB-backed feature to active.
     allowed_extra_writes:
       - controlled by AGENTS.md and FEATURE_IMPLEMENTATION_PIPELINE.md
     ask_user_when:
       - No feature is selected.
       - active or review already contains a feature.
+      - source scaffold approval is missing.
+      - source scaffold needs more information than docs/source-layout.yml provides.
       - database baseline approval is missing for a DB-backed project.

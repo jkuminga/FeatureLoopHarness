@@ -226,6 +226,7 @@ backlog
 Prisma baseline은 기본적으로 backend package인 `app/be` 안에서 관리한다.
 루트 `package.json`은 필요할 경우 `app/be`의 DB 명령을 호출하는 forwarding script만 둔다.
 실제 DB 서버 배포는 첫 기능 구현을 시작하기 전에 한 번 수행한다.
+DB 배포 전에 source package scaffold baseline을 먼저 완료해 package/script 기반을 준비한다.
 
 첫 기능을 `active/`로 옮기기 전에 다음을 확인한다.
 
@@ -236,7 +237,7 @@ approvals:
     verified: true
 ```
 
-이 기록이 없으면 사용자에게 DB provider, environment, 필요한 secret/env 설정을 요청한다.
+이 기록이 없으면 사용자에게 DB provider 또는 Prisma-compatible database, environment, 필요한 secret/env 설정을 요청한다.
 비밀값은 문서나 `STATE.md`에 기록하지 않는다.
 
 권장 명령 이름:

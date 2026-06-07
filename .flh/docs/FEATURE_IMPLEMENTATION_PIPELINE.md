@@ -25,7 +25,8 @@ status: completed
 ```text
 0. Preparation
 1. Design
-1.5 Baseline DB Deployment
+1.5 Source Package Scaffold Baseline
+1.6 Baseline DB Deployment
 2. Branch and Worktree
 3. Implementation and Tests
 4. Verification
@@ -126,7 +127,73 @@ DB 변경 규칙:
 
 ---
 
-## 1.5. Baseline DB Deployment
+## 1.5. Source Package Scaffold Baseline
+
+source package scaffold baseline은 첫 기능 구현 전에 프로젝트 공통 package 기반을 준비하는 단계다.
+
+목적:
+
+- 기능 구현과 프로젝트 기반 설정을 분리한다.
+- `docs/source-layout.yml`에 기록된 package, framework, runtime, language, module, testing, lint/format 결정을 실제 package 기반으로 반영한다.
+- DB deployment와 기능 구현에서 사용할 package script 기반을 준비한다.
+
+실행 시점:
+
+- 첫 기능 branch/worktree를 만들기 전
+- `.flh/runtime/STATE.md`에 `approvals.source_scaffold.created: true`가 없을 때
+
+절차:
+
+1. `docs/source-layout.yml`을 읽고 source root, package manager, workspace, framework, runtime, language, module, testing, tooling 결정을 확인한다.
+2. scaffold 생성에 더 필요한 정보가 있는지 확인한다.
+3. 추가 정보가 필요하면 사용자에게 질문한다.
+4. 추가 정보 없이 기본값 또는 생략으로 진행할 수 있는 경우에도 사용자에게 진행 허락을 받는다.
+5. main/master에서 source package scaffold baseline을 생성한다.
+6. 생성된 파일이 scaffold baseline 허용 범위 안에 있는지 확인한다.
+7. scaffold baseline을 커밋한다.
+8. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
+
+허용 범위:
+
+- package-level `package.json`
+- package manager/workspace 설정
+- lint/typecheck/test script
+- TypeScript 또는 runtime config
+- lint/format/test runner config
+- 최소 entry file
+- Prisma를 사용하는 backend package의 기본 연결 구조
+- 빈 source directory를 유지하기 위한 `.gitkeep`
+
+금지 범위:
+
+- 실제 기능 화면 구현
+- 실제 API route 구현
+- 도메인 로직 구현
+- 기능 테스트 작성
+- 특정 기능 요구사항 반영
+- 대규모 UI component 생성
+
+기록 예시:
+
+```yaml
+approvals:
+  source_scaffold:
+    created: true
+    based_on: docs/source-layout.yml
+    package_manager: npm
+    created_at: 2026-06-07T00:00:00Z
+```
+
+규칙:
+
+- scaffold baseline은 특정 기능 산출물이 아니라 프로젝트 공통 기반이다.
+- scaffold baseline이 완료되기 전에는 기능 branch/worktree를 만들지 않는다.
+- 이미 `approvals.source_scaffold.created: true`면 이 단계는 생략할 수 있다.
+- 비밀값, API key, token, DB connection string은 `STATE.md`에 기록하지 않는다.
+
+---
+
+## 1.6. Baseline DB Deployment
 
 실제 DB 서버 배포는 프로젝트 전체 `DATA_MODEL_DEFINITION` 단계가 아니라, `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
 
@@ -134,22 +201,25 @@ DB 변경 규칙:
 
 - `docs/DB_SCHEMA.md`와 `app/be/prisma/schema.prisma`로 확정한 baseline schema를 실제 개발 DB에 반영한다.
 - 첫 기능 구현부터 실제 DB 연결을 기준으로 개발할 수 있게 한다.
-- DB provider, 환경, 검증 여부를 비밀값 없이 기록한다.
+- migration tool, database, environment, 검증 여부를 비밀값 없이 기록한다.
 
 실행 시점:
 
 - `docs/features/active/`로 첫 기능을 이동하기 전
+- `.flh/runtime/STATE.md`에 `approvals.source_scaffold.created: true`가 기록된 뒤
 - `.flh/runtime/STATE.md`에 `approvals.database_baseline.verified: true`가 없을 때
 
 절차:
 
-1. 사용자에게 사용할 DB provider와 environment를 확인한다.
-2. 필요한 환경변수/API key/connection string을 사용자에게 요청한다.
-3. 비밀값은 `.env`, 배포 플랫폼 secret, 또는 사용자가 지정한 안전한 위치에만 둔다.
-4. 비밀값을 docs, feature 문서, `STATE.md`에 기록하지 않는다.
-5. baseline migration을 실제 DB에 적용한다.
-6. 실제 DB 연결과 baseline schema 반영 여부를 검증한다.
-7. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
+1. `docs/source-layout.yml`, `docs/DB_SCHEMA.md`, `app/be/prisma/schema.prisma`를 확인한다.
+2. DB-backed project인지 확인한다.
+3. 사용자에게 사용할 DB provider 또는 Prisma-compatible database, environment를 확인한다.
+4. 필요한 환경변수/API key/connection string을 사용자에게 요청한다.
+5. 비밀값은 `.env`, 배포 플랫폼 secret, 또는 사용자가 지정한 안전한 위치에만 둔다.
+6. 비밀값을 docs, feature 문서, `STATE.md`에 기록하지 않는다.
+7. baseline migration을 실제 DB에 적용한다.
+8. 실제 DB 연결과 baseline schema 반영 여부를 검증한다.
+9. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
 
 권장 명령 이름:
 
@@ -163,7 +233,8 @@ npm run db:verify
 ```yaml
 approvals:
   database_baseline:
-    provider: supabase
+    migration_tool: prisma
+    database: postgresql
     environment: development
     deployed: true
     verified: true
@@ -174,8 +245,11 @@ approvals:
 
 - Prisma baseline은 backend package인 `app/be/prisma/`를 기준으로 한다.
 - 루트 `db:*` script는 필요하면 `app/be`의 Prisma script로 위임한다.
+- DB SaaS 이름은 필수값이 아니다. Prisma migration과 verify command가 충분히 동작하면 `DATABASE_URL` 같은 env만으로 진행할 수 있다.
+- Supabase, Neon, RDS처럼 서비스 특성에 따라 direct URL, pooler URL, SSL, migration 권한이 달라지는 경우에는 사용자에게 서비스 정보를 질문한다.
 - `db:deploy`는 baseline migration을 실제 DB에 적용한다.
 - `db:verify`는 실제 DB 연결, migration 적용 여부, 핵심 테이블 존재 여부를 확인한다.
+- 필요한 env가 없으면 사용자에게 필요한 값을 안내하고 중단한다. 사용자가 env를 채운 뒤 같은 구현 요청을 다시 보내면 현재 파일과 `STATE.md` 기준으로 다시 판단한다.
 - `db:verify`가 실패하면 첫 기능 구현을 시작하지 않는다.
 - 이미 `approvals.database_baseline.verified: true`면 이 단계는 생략할 수 있다.
 
@@ -183,13 +257,15 @@ approvals:
 
 ## 2. Branch and Worktree
 
-구현 시작 전에 baseline DB deployment 상태를 확인하고, 기능 디렉토리를 `docs/features/ready/`에서 `docs/features/active/`로 이동한다.
+구현 시작 전에 source scaffold baseline과 baseline DB deployment 상태를 확인하고, 기능 디렉토리를 `docs/features/ready/`에서 `docs/features/active/`로 이동한다.
 
 규칙:
 
 - 모든 구현 작업은 별도 워크트리에서 진행한다.
-- 첫 기능 구현 전 `.flh/runtime/STATE.md`의 `approvals.database_baseline.verified`가 `true`인지 확인한다.
-- 아직 baseline DB가 검증되지 않았다면 먼저 `Baseline DB Deployment`를 수행한다.
+- 첫 기능 구현 전 `.flh/runtime/STATE.md`의 `approvals.source_scaffold.created`가 `true`인지 확인한다.
+- 아직 source scaffold baseline이 완료되지 않았다면 먼저 `Source Package Scaffold Baseline`을 수행한다.
+- DB-backed project라면 첫 기능 구현 전 `.flh/runtime/STATE.md`의 `approvals.database_baseline.verified`가 `true`인지 확인한다.
+- DB-backed project인데 아직 baseline DB가 검증되지 않았다면 먼저 `Baseline DB Deployment`를 수행한다.
 - 브랜치 이름은 기능 디렉토리명을 기반으로 한다.
 - 워크트리 이름도 기능 디렉토리명을 기반으로 한다.
 - 구현 시작 전 `SPEC.md`, `CHECKLIST.md`, `TEST_CASES.md`를 다시 확인한다.

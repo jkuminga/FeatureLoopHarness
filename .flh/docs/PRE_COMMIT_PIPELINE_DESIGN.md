@@ -30,6 +30,21 @@
 
 ---
 
+## Implementation Refinement Checklist
+
+pre-commit script를 실제 구현하기 전에 다음 항목을 하나씩 확정하고 이 문서에 반영한다.
+
+- [x] 파일 분류 우선순위를 명확히 한다. source root 내부 파일은 root/harness 파일명과 같아도 source file로 우선 판정한다.
+- [ ] scaffold baseline exception에서 허용할 root package/workspace 설정 파일 범위를 명확히 한다.
+- [ ] `docs/source-layout.yml`이 `template` 또는 미완성 상태일 때 source commit과 docs/harness commit을 어떻게 처리할지 명확히 한다.
+- [ ] source file이 staged된 branch가 `feat/`, `fix/`, `refactor/`가 아닌 경우의 차단 규칙을 명확히 한다.
+- [ ] package manager별 script 실행 명령을 명확히 한다.
+- [ ] 실제 `.husky/pre-commit`과 root `package.json`의 `lint-staged` 설정 전환 방식을 명확히 한다.
+- [ ] nested source root가 있을 때 가장 긴 path prefix를 우선하는 affected package 탐지 규칙을 명확히 한다.
+- [ ] `.flh/runtime/STATE.md`는 frontmatter만 machine-readable state로 읽는다는 구현 규칙을 명확히 한다.
+
+---
+
 ## Required Inputs
 
 ### Git
@@ -136,6 +151,10 @@ pre-commit은 staged file을 먼저 분류한다.
 - `docs/source-layout.yml`의 `source_roots.*.path` 내부 파일
 - source layout이 아직 completed가 아닌 상태에서 `app/`, `apps/`, `packages/` 내부에 있는 파일
 
+파일 분류는 파일명보다 경로를 우선한다.
+source root 내부에 있는 `package.json`, lockfile, workspace/config 파일은 root/harness 파일명과 같아도 source file로 본다.
+예를 들어 `app/be/package.json`은 source file이고, root `package.json`만 documentation/harness file로 본다.
+
 ### Documentation and Harness Files
 
 다음 파일은 문서/하네스 파일로 본다.
@@ -161,9 +180,33 @@ unknown file이 staged된 경우 pre-commit은 경고를 출력하되, source fi
 
 ## Branch Policy
 
+### Scaffold Baseline Context
+
+source package scaffold baseline은 첫 기능 구현 전에 프로젝트 공통 package 기반을 준비하는 1회성 작업이다.
+
+pre-commit은 scaffold를 생성하지 않는다.
+pre-commit은 main/master에서 발생하는 scaffold baseline commit이 허용 범위 안에 있는지만 검증한다.
+
+첫 기능 구현 전 준비 순서는 다음과 같다.
+
+```text
+FEATURE_IMPLEMENTATION request
+-> Source Package Scaffold Baseline
+-> Baseline DB Deployment
+-> Branch and Worktree
+-> Feature Implementation Loop
+```
+
+scaffold baseline은 `.flh/runtime/STATE.md`의 `approvals.source_scaffold.created: true`를 기준으로 idempotent하게 처리한다.
+이미 해당 approval이 있으면 scaffold baseline 예외는 다시 열리지 않는다.
+
+scaffold baseline은 DB 배포를 위한 package/script 기반을 준비할 수 있지만, 실제 DB provider 확인, env/secret 요청, migration 적용, DB 연결 검증은 `Baseline DB Deployment` 단계에서 처리한다.
+
 ### main/master
 
 source file이 staged된 경우 commit을 차단한다.
+
+단, 최초 source package scaffold baseline commit은 1회 예외로 허용한다.
 
 문서/하네스 파일만 staged된 경우 commit을 허용한다.
 
@@ -182,6 +225,49 @@ main/master 브랜치에서는 실제 소스 파일을 직접 커밋할 수 없�
 해결 방법:
 feat/*, fix/*, refactor/* 브랜치에서 작업한 뒤 머지하세요.
 ```
+
+### Scaffold Baseline Exception
+
+main/master에서 source file이 staged되어 있어도 다음 조건을 모두 만족하면 commit을 허용한다.
+
+- `.flh/runtime/STATE.md`의 `current_state`가 `FEATURE_IMPLEMENTATION`이다.
+- `.flh/runtime/STATE.md`에 `approvals.source_scaffold.created: true`가 아직 없다.
+- staged source files가 `docs/source-layout.yml`의 `source_roots.*.path` 내부에만 있다.
+- staged source files가 scaffold baseline 허용 범위에만 속한다.
+- staged non-source harness file은 `.flh/runtime/STATE.md`의 `approvals.source_scaffold` 기록에 한정한다.
+- 기능 화면, API route, 도메인 로직, 기능 테스트가 포함되지 않는다.
+
+예외 허용 파일 예시:
+
+```text
+package.json
+package-lock.json
+tsconfig*.json
+vite.config.*
+vitest.config.*
+playwright.config.*
+eslint.config.*
+.prettierrc*
+src/index.*
+src/main.*
+src/app.*
+.gitkeep
+```
+
+차단 후보 예시:
+
+```text
+src/features/**
+src/routes/**
+src/pages/**
+src/components/**
+*.test.*
+*.spec.*
+tests/**
+```
+
+scaffold baseline commit이 완료되면 `.flh/runtime/STATE.md`에 `approvals.source_scaffold.created: true`가 기록되어야 한다.
+이후 main/master source commit 예외는 다시 열리지 않는다.
 
 ### Feature Branch
 
@@ -395,14 +481,16 @@ source package checks
 4. docs/source-layout.yml 상태 확인
 5. staged file 분류
 6. source file이 없으면 source package checks와 lint-staged를 모두 스킵하고 commit 허용
-7. main/master에서 source file이 있으면 차단
-8. source file이 있으면 active/review 기능 디렉토리 확인
-9. affected package 목록 생성
-10. `package: true`인데 package.json이 없으면 차단
-11. affected package별 package manager 탐지
-12. package별 lint/typecheck/test script 실행
-13. lint-staged 실행
-14. 모든 검증 통과 시 commit 허용
+7. main/master에서 source file이 있으면 scaffold baseline exception 여부 확인
+8. scaffold baseline exception이 아니면 main/master source commit 차단
+9. scaffold baseline exception이면 허용 파일 범위만 확인하고 commit 허용
+10. feature/fix/refactor branch에서 source file이 있으면 active/review 기능 디렉토리 확인
+11. affected package 목록 생성
+12. `package: true`인데 package.json이 없으면 차단
+13. affected package별 package manager 탐지
+14. package별 lint/typecheck/test script 실행
+15. lint-staged 실행
+16. 모든 검증 통과 시 commit 허용
 ```
 
 ---
@@ -424,6 +512,9 @@ if no source files:
     exit(0)
 
 if branch is main or master:
+    if is_scaffold_baseline_exception(staged_files, state, source_layout):
+        print scaffold baseline exception message
+        exit(0)
     print Korean block message
     exit(1)
 

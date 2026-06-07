@@ -39,6 +39,19 @@ approvals:
     approved: true
 ```
 
+### `approvals.source_scaffold`
+
+첫 기능 구현 전에 source package scaffold baseline이 생성되고 커밋된 경우 기록한다.
+
+```yaml
+approvals:
+  source_scaffold:
+    created: true
+    based_on: docs/source-layout.yml
+    package_manager: npm
+    created_at: 2026-06-07T00:00:00Z
+```
+
 ### `approvals.database_baseline`
 
 첫 기능을 `docs/features/active/`로 이동하기 전에 실제 개발 DB baseline 배포와 검증이 성공한 경우 기록한다.
@@ -46,7 +59,8 @@ approvals:
 ```yaml
 approvals:
   database_baseline:
-    provider: supabase
+    migration_tool: prisma
+    database: postgresql
     environment: development
     deployed: true
     verified: true
