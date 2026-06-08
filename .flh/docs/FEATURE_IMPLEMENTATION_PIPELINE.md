@@ -150,8 +150,9 @@ source package scaffold baseline은 첫 기능 구현 전에 프로젝트 공통
 4. 추가 정보 없이 기본값 또는 생략으로 진행할 수 있는 경우에도 사용자에게 진행 허락을 받는다.
 5. main/master에서 source package scaffold baseline을 생성한다.
 6. 생성된 파일이 scaffold baseline 허용 범위 안에 있는지 확인한다.
-7. scaffold baseline을 커밋한다.
-8. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
+7. `.flh/runtime/STATE.md`에 비밀값 없는 `approvals.source_scaffold.created: true` 기록을 추가한다.
+8. scaffold baseline 파일과 `.flh/runtime/STATE.md`를 함께 stage한다.
+9. scaffold baseline 파일과 source scaffold approval 기록을 같은 커밋에 포함해 커밋한다.
 
 허용 범위:
 
@@ -187,6 +188,7 @@ approvals:
 규칙:
 
 - scaffold baseline은 특정 기능 산출물이 아니라 프로젝트 공통 기반이다.
+- scaffold baseline commit은 생성된 scaffold 파일과 `.flh/runtime/STATE.md`의 `approvals.source_scaffold.created: true` 기록을 반드시 같은 커밋에 포함해야 한다.
 - scaffold baseline이 완료되기 전에는 기능 branch/worktree를 만들지 않는다.
 - 이미 `approvals.source_scaffold.created: true`면 이 단계는 생략할 수 있다.
 - 비밀값, API key, token, DB connection string은 `STATE.md`에 기록하지 않는다.
