@@ -1126,6 +1126,8 @@ def documentation_additional_prompt() -> str:
         "- Do not modify app/, apps/, src/, implementation code, tests/e2e/, Prisma migrations, or DB schema/migration files.\n"
         "- Do not run .flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md as an implementation workflow.\n"
         "- Do not create worktrees or branches.\n"
+        "- /d may perform explicit workflow state skip/transition requests.\n"
+        "- Do not skip MVP_DEFINITION, ARCHITECTURE_DESIGN, or FEATURE_INDEX_DEFINITION.\n"
         "- Commit and push are allowed only when the user explicitly asks and all changed files are within the allowed documentation/harness targets.\n"
         "- Merge is not allowed in /d mode."
     )

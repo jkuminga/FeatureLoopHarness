@@ -140,6 +140,80 @@ class UserPromptSubmitHookTest(unittest.TestCase):
             ],
         )
 
+    def write_completed_feature_index(self):
+        target = self.root / "docs/features/feature-index.md"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            "\n".join(
+                [
+                    "---",
+                    "status: completed",
+                    "---",
+                    "",
+                    "# Feature Index",
+                    "",
+                    "## Feature Index",
+                    "",
+                    "Completed feature index summary with enough detail.",
+                    "",
+                    "## Feature List",
+                    "",
+                    "| Feature ID | Name | Summary | Priority | Core Requirements |",
+                    "| --- | --- | --- | --- | --- |",
+                    "| FEAT-001 | Login | User login flow | high | User can sign in securely |",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+    def write_completed_db_schema(self):
+        self.write_completed_doc(
+            "docs/DB_SCHEMA.md",
+            [
+                "Core Entities",
+                "Entity Specifications",
+                "Relation Specifications",
+                "Indexes and Constraints",
+                "Enums",
+                "Ownership and Permissions",
+                "ID Strategy",
+                "Lifecycle Policy",
+                "Common Field Policy",
+                "Prisma Mapping Notes",
+                "Migration Notes",
+            ],
+        )
+
+    def write_completed_api_doc(self):
+        self.write_completed_doc(
+            "docs/API.md",
+            [
+                "API Areas",
+                "Endpoint Draft",
+                "Authentication and Authorization",
+                "Request and Response Rules",
+                "Error Response Rules",
+            ],
+        )
+
+    def write_completed_design_doc(self):
+        self.write_completed_doc(
+            "docs/DESIGN.md",
+            [
+                "Layout Principles",
+                "Component Principles",
+                "State Loading and Error",
+                "Form Rules",
+                "Responsive Rules",
+                "Accessibility",
+            ],
+        )
+
+    def create_feature_state_directories(self):
+        for name in ("backlog", "ready", "active", "blocked", "review", "done", "postponed"):
+            (self.root / "docs/features" / name).mkdir(parents=True, exist_ok=True)
+
     def write_state(self, text):
         self.module.STATE_PATH.write_text(text, encoding="utf-8")
 
@@ -294,6 +368,14 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         self.assertIn("Commit and push are allowed", result.additional_prompt)
         self.assertIn("Merge is not allowed", result.additional_prompt)
 
+    def test_documentation_prefix_includes_manual_skip_policy(self):
+        result = self.module.handle_prompt("/d DATA_MODEL_DEFINITION 스킵하고 API로 넘어가")
+
+        self.assertEqual(result.action, "allow")
+        self.assertEqual(result.request_type, "DOCUMENTATION_REQUEST")
+        self.assertIn("workflow state skip/transition", result.additional_prompt)
+        self.assertIn("Do not skip MVP_DEFINITION", result.additional_prompt)
+
     def test_documentation_prefix_blocks_merge(self):
         result = self.module.handle_prompt("/d 머지 해줘")
 
@@ -400,6 +482,24 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         self.assertEqual(result.target_state, "MVP_DEFINITION")
         self.assertIn("No transition path exists", result.reason)
 
+    def test_blocks_wrong_request_matrix_for_current_state(self):
+        scenarios = [
+            ("MVP_DEFINITION", "API 설계해줘", "API_DESIGN_REQUEST"),
+            ("ARCHITECTURE_DESIGN", "기능 구현해줘", "IMPLEMENTATION_REQUEST"),
+            ("FEATURE_INDEX_DEFINITION", "프론트 디자인 지침 정리하자", "FRONTEND_DESIGN_REQUEST"),
+            ("DATA_MODEL_DEFINITION", "이 기능 준비해줘", "FEATURE_PREPARE_REQUEST"),
+            ("API_DESIGN", "MVP 범위를 설계해줘", "MVP_DESIGN_REQUEST"),
+        ]
+
+        for state, prompt, request_type in scenarios:
+            with self.subTest(state=state, prompt=prompt):
+                self.write_base_state(state)
+                result = self.module.handle_prompt(prompt)
+                self.assertEqual(result.action, "block")
+                self.assertEqual(result.request_type, request_type)
+                state_text = self.module.STATE_PATH.read_text(encoding="utf-8")
+                self.assertIn(f"current_state: {state}", state_text)
+
     def test_transitions_when_required_doc_is_completed(self):
         self.write_completed_doc(
             "docs/MVP.md",
@@ -427,6 +527,48 @@ class UserPromptSubmitHookTest(unittest.TestCase):
         state_text = self.module.STATE_PATH.read_text(encoding="utf-8")
         self.assertIn("current_state: ARCHITECTURE_DESIGN", state_text)
         self.assertIn("  - MVP_DEFINITION", state_text)
+
+    def test_project_workflow_happy_path_reaches_feature_implementation(self):
+        self.write_completed_doc(
+            "docs/MVP.md",
+            [
+                "MVP Goal",
+                "Target Users",
+                "Core Problem",
+                "In Scope",
+                "Out of Scope",
+                "Success Criteria",
+            ],
+        )
+        architecture = self.module.handle_prompt("아키텍처 설계하자")
+        self.assertEqual(architecture.updated_state, "ARCHITECTURE_DESIGN")
+
+        self.write_completed_architecture_doc()
+        self.write_completed_source_layout()
+        (self.root / "app/fe").mkdir(parents=True)
+        (self.root / "app/be").mkdir(parents=True)
+        feature_index = self.module.handle_prompt("기능 목록 정리해줘")
+        self.assertEqual(feature_index.updated_state, "FEATURE_INDEX_DEFINITION")
+
+        self.write_completed_feature_index()
+        data_model = self.module.handle_prompt("데이터 모델 설계하자")
+        self.assertEqual(data_model.updated_state, "DATA_MODEL_DEFINITION")
+
+        self.write_completed_db_schema()
+        api = self.module.handle_prompt("API 설계해줘")
+        self.assertEqual(api.updated_state, "API_DESIGN")
+
+        self.write_completed_api_doc()
+        frontend = self.module.handle_prompt("프론트 디자인 지침 정리하자")
+        self.assertEqual(frontend.updated_state, "FRONTEND_DESIGN")
+
+        self.write_completed_design_doc()
+        self.create_feature_state_directories()
+        implementation = self.module.handle_prompt("이 기능 준비해줘")
+        self.assertEqual(implementation.updated_state, "FEATURE_IMPLEMENTATION")
+
+        state_text = self.module.STATE_PATH.read_text(encoding="utf-8")
+        self.assertIn("current_state: FEATURE_IMPLEMENTATION", state_text)
 
     def test_source_layout_yaml_requires_completed_manifest(self):
         docs_spec = self.module.load_yaml(self.module.DOCS_SPEC_PATH)
