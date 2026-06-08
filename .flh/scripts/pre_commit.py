@@ -258,6 +258,14 @@ def is_source_candidate(path: str, roots: list[dict[str, Any]]) -> bool:
     return any(path_is_inside(normalized, str(root["path"])) for root in roots)
 
 
+def unknown_files(staged_files: list[str], roots: list[dict[str, Any]]) -> list[str]:
+    return [
+        path
+        for path in staged_files
+        if not is_doc_harness_file(path) and not is_source_candidate(path, roots)
+    ]
+
+
 def match_source_root(path: str, roots: list[dict[str, Any]]) -> dict[str, Any] | None:
     matches = [root for root in roots if path_is_inside(path, str(root["path"]))]
     if not matches:
@@ -498,10 +506,24 @@ def main() -> int:
         source_candidates = [
             path for path in staged_files if is_source_candidate(path, candidate_roots)
         ]
+        unknown = unknown_files(staged_files, candidate_roots)
 
         if not source_candidates:
+            if unknown:
+                print("⚠️ unknown file이 staged되어 있습니다.")
+                print("source file 변경이 함께 없으므로 commit을 차단하지 않습니다.")
+                for path in unknown:
+                    print(f"- {path}")
             print("⏭️ source file 변경이 없어 source package checks와 lint-staged를 건너뜁니다.")
             return 0
+
+        if unknown:
+            block(
+                "source file과 unknown file이 함께 staged되어 있습니다.\n\n"
+                "unknown file은 source/layout 또는 docs/harness 정책에 속하지 않아 함께 커밋할 수 없습니다.\n\n"
+                "unknown file:\n"
+                + "\n".join(f"- {path}" for path in unknown)
+            )
 
         if not source_layout_completed(source_layout):
             block(

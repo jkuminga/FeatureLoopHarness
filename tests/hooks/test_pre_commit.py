@@ -61,6 +61,29 @@ class PreCommitScriptTest(unittest.TestCase):
         self.assertEqual(matched["key"], "backend")
         self.assertEqual(matched["path"], "app/be")
 
+    def test_unknown_files_excludes_source_and_harness_files(self):
+        source_layout = {
+            "source_roots": {
+                "backend": {
+                    "path": "app/be",
+                    "package": True,
+                }
+            }
+        }
+        roots = self.module.source_roots(source_layout)
+
+        unknown = self.module.unknown_files(
+            [
+                "docs/ARCHITECTURE.md",
+                ".flh/runtime/STATE.md",
+                "app/be/src/index.ts",
+                "HARNESS_MANUAL.md",
+            ],
+            roots,
+        )
+
+        self.assertEqual(unknown, ["HARNESS_MANUAL.md"])
+
     def test_state_frontmatter_ignores_body_approval_example(self):
         text = "\n".join(
             [
