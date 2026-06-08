@@ -195,11 +195,12 @@ approvals:
 
 ## 1.6. Baseline DB Deployment
 
-실제 DB 서버 배포는 프로젝트 전체 `DATA_MODEL_DEFINITION` 단계가 아니라, `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
+실제 Prisma schema 생성, baseline migration 생성, DB 서버 배포는 프로젝트 전체 `DATA_MODEL_DEFINITION` 단계가 아니라, `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
 
 목적:
 
-- `docs/DB_SCHEMA.md`와 `app/be/prisma/schema.prisma`로 확정한 baseline schema를 실제 개발 DB에 반영한다.
+- `docs/DB_SCHEMA.md`의 Prisma-ready 명세를 기준으로 `app/be/prisma/schema.prisma`를 반드시 생성한다.
+- 생성한 `schema.prisma`에서 baseline migration을 만들고 실제 개발 DB에 반영한다.
 - 첫 기능 구현부터 실제 DB 연결을 기준으로 개발할 수 있게 한다.
 - migration tool, database, environment, 검증 여부를 비밀값 없이 기록한다.
 
@@ -211,15 +212,19 @@ approvals:
 
 절차:
 
-1. `docs/source-layout.yml`, `docs/DB_SCHEMA.md`, `app/be/prisma/schema.prisma`를 확인한다.
+1. `docs/source-layout.yml`과 `docs/DB_SCHEMA.md`를 확인한다.
 2. DB-backed project인지 확인한다.
-3. 사용자에게 사용할 DB provider 또는 Prisma-compatible database, environment를 확인한다.
-4. 필요한 환경변수/API key/connection string을 사용자에게 요청한다.
-5. 비밀값은 `.env`, 배포 플랫폼 secret, 또는 사용자가 지정한 안전한 위치에만 둔다.
-6. 비밀값을 docs, feature 문서, `STATE.md`에 기록하지 않는다.
-7. baseline migration을 실제 DB에 적용한다.
-8. 실제 DB 연결과 baseline schema 반영 여부를 검증한다.
-9. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
+3. `docs/DB_SCHEMA.md`의 Entity Specifications, Relation Specifications, Indexes and Constraints, Enums, Prisma Mapping Notes, Migration Notes를 기준으로 `app/be/prisma/schema.prisma`를 생성한다.
+4. `schema.prisma` 생성에 필요한 정보가 `docs/DB_SCHEMA.md`에 부족하면 임의 추론하지 말고 사용자에게 질문하고, 필요하면 먼저 `docs/DB_SCHEMA.md`를 보강한다.
+5. 생성한 `schema.prisma`가 `docs/DB_SCHEMA.md`의 entity, field, relation, enum, index, constraint를 빠짐없이 반영하는지 대조한다.
+6. backend package에 Prisma CLI, `@prisma/client`, DB deploy/verify script가 없으면 source scaffold baseline 범위 안에서 추가한다.
+7. 사용자에게 사용할 DB provider 또는 Prisma-compatible database, environment를 확인한다.
+8. 필요한 환경변수/API key/connection string을 사용자에게 요청한다.
+9. 비밀값은 `.env`, 배포 플랫폼 secret, 또는 사용자가 지정한 안전한 위치에만 둔다.
+10. 비밀값을 docs, feature 문서, `STATE.md`에 기록하지 않는다.
+11. baseline migration을 생성하고 실제 DB에 적용한다.
+12. 실제 DB 연결과 baseline schema 반영 여부를 검증한다.
+13. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
 
 권장 명령 이름:
 
@@ -243,7 +248,8 @@ approvals:
 
 규칙:
 
-- Prisma baseline은 backend package인 `app/be/prisma/`를 기준으로 한다.
+- Prisma baseline은 backend package인 `app/be/prisma/`를 기준으로 이 단계에서 생성한다.
+- `DATA_MODEL_DEFINITION` 단계는 `schema.prisma`를 만들지 않는다. 이 단계에서는 반드시 `docs/DB_SCHEMA.md`를 실행 가능한 Prisma schema로 변환한다.
 - 루트 `db:*` script는 필요하면 `app/be`의 Prisma script로 위임한다.
 - DB SaaS 이름은 필수값이 아니다. Prisma migration과 verify command가 충분히 동작하면 `DATABASE_URL` 같은 env만으로 진행할 수 있다.
 - Supabase, Neon, RDS처럼 서비스 특성에 따라 direct URL, pooler URL, SSL, migration 권한이 달라지는 경우에는 사용자에게 서비스 정보를 질문한다.

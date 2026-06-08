@@ -222,10 +222,9 @@ backlog
 
 ### Baseline DB Deployment
 
-`DATA_MODEL_DEFINITION` 단계는 `docs/DB_SCHEMA.md`, `app/be/prisma/schema.prisma`, baseline migration 산출물을 확정하는 단계다.
+`DATA_MODEL_DEFINITION` 단계는 실제 Prisma 파일을 만들지 않고, `docs/DB_SCHEMA.md`를 Prisma-ready 데이터 모델 명세로 확정하는 단계다.
+`app/be/prisma/schema.prisma`, baseline migration, DB deploy/verify script 생성은 첫 기능 구현을 시작하기 전 `FEATURE_IMPLEMENTATION`의 `1.6. Baseline DB Deployment`에서 수행한다.
 Prisma baseline은 기본적으로 backend package인 `app/be` 안에서 관리한다.
-루트 `package.json`은 필요할 경우 `app/be`의 DB 명령을 호출하는 forwarding script만 둔다.
-실제 DB 서버 배포는 첫 기능 구현을 시작하기 전에 한 번 수행한다.
 DB 배포 전에 source package scaffold baseline을 먼저 완료해 package/script 기반을 준비한다.
 
 첫 기능을 `active/`로 옮기기 전에 다음을 확인한다.

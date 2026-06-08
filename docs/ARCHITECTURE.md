@@ -77,6 +77,7 @@ status: template
 
 아키텍처 단계에서는 필요한 source directory와 `.gitkeep`만 생성한다.
 프레임워크 scaffold와 실제 구현 코드는 기능 구현 단계에서 다룬다.
+최초 source package scaffold baseline에서 기본 root scaffold category에 없는 root file이 필요하면 `docs/source-layout.yml`의 `project.scaffold_extra_root_files`에 명시한다.
 
 ---
 

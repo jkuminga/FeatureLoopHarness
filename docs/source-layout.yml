@@ -6,6 +6,7 @@ project:
   package_manager: "{{TODO_PACKAGE_MANAGER}}"
   workspace: "{{TODO_WORKSPACE_TRUE_OR_FALSE}}"
   runtime: "{{TODO_RUNTIME}}"
+  scaffold_extra_root_files: []
 
 source_roots:
   example:

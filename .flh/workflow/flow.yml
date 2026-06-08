@@ -34,7 +34,7 @@ states:
       - DATA_MODEL_DEFINITION
 
   DATA_MODEL_DEFINITION:
-    description: "Define the actual project's data model baseline and Prisma baseline."
+    description: "Define the actual project's Prisma-ready data model baseline in docs/DB_SCHEMA.md without creating Prisma files."
     allowed_request_types:
       - DATA_MODEL_DESIGN_REQUEST
       - PRISMA_BASELINE_CREATE_REQUEST

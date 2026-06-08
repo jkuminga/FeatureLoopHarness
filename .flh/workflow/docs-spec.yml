@@ -78,15 +78,19 @@ documents:
 
   db_schema:
     path: docs/DB_SCHEMA.md
-    purpose: "Template completed by the actual project to define data model baseline."
+    purpose: "Template completed by the actual project to define a Prisma-ready data model baseline."
     required_sections:
       - "Core Entities"
-      - "Relationships"
+      - "Entity Specifications"
+      - "Relation Specifications"
+      - "Indexes and Constraints"
+      - "Enums"
       - "Ownership and Permissions"
       - "ID Strategy"
       - "Lifecycle Policy"
-      - "Common Fields"
-      - "Prisma Baseline"
+      - "Common Field Policy"
+      - "Prisma Mapping Notes"
+      - "Migration Notes"
 
   api:
     path: docs/API.md

@@ -26,10 +26,6 @@ transitions:
     to: API_DESIGN
     required_docs:
       - db_schema
-    required_files:
-      - app/be/prisma/schema.prisma
-    suggested_commands:
-      - npm run db:validate
 
   API_DESIGN_TO_FRONTEND_DESIGN:
     from: API_DESIGN

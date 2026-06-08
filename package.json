@@ -10,8 +10,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "python3 -m unittest tests/hooks/test_user_prompt_submit.py",
-    "precommit": "lint-staged",
+    "test": "python3 -m unittest tests/hooks/test_user_prompt_submit.py tests/hooks/test_pre_commit.py",
+    "precommit": "python3 .flh/scripts/pre_commit.py",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -19,26 +19,9 @@
     "lint-staged": "^17.0.6"
   },
   "lint-staged": {
-    ".flh/hooks/user_prompt_submit.py": [
-      "bash -c 'python3 -m unittest tests/hooks/test_user_prompt_submit.py'"
-    ],
-    "tests/hooks/*.py": [
-      "bash -c 'python3 -m unittest tests/hooks/test_user_prompt_submit.py'"
-    ],
-    ".flh/workflow/*.{yml,yaml}": [
-      "bash -c 'python3 -m unittest tests/hooks/test_user_prompt_submit.py'"
-    ],
-    ".codex/hooks/*": [
-      "bash -c 'python3 -m unittest tests/hooks/test_user_prompt_submit.py'"
-    ],
-    ".codex/hooks.json": [
-      "bash -c 'python3 -m unittest tests/hooks/test_user_prompt_submit.py'"
-    ],
-    "AGENTS.md": [
-      "bash -c 'python3 -m unittest tests/hooks/test_user_prompt_submit.py'"
-    ],
-    "README.md": [
-      "bash -c 'python3 -m unittest tests/hooks/test_user_prompt_submit.py'"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
     ]
   }
 }

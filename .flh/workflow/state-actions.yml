@@ -27,6 +27,7 @@ states:
       - Ask the user for any missing docs/source-layout.yml fields before marking architecture completed.
       - Write docs/source-layout.yml.
       - Record package-level framework, runtime, language, module, testing, and tooling decisions in docs/source-layout.yml.
+      - Record project.scaffold_extra_root_files in docs/source-layout.yml only when scaffold baseline needs root files outside the default scaffold categories.
       - Create only the directories listed in docs/source-layout.yml.
       - Add .gitkeep to empty source directories.
       - Update docs/ARCHITECTURE.md.
@@ -57,20 +58,16 @@ states:
   DATA_MODEL_DEFINITION:
     required_outputs:
       - docs/DB_SCHEMA.md
-      - app/be/prisma/schema.prisma
     actions:
-      - Confirm backend package and Prisma location from docs/source-layout.yml when available.
-      - Define core entities, relationships, ownership, permissions, ID strategy, lifecycle, and common fields.
-      - Create or update Prisma baseline under app/be/prisma.
-      - Add or update app/be/package.json Prisma dependencies and db scripts when needed.
-      - Add root package.json DB forwarding scripts when needed.
+      - Define the project-wide data model baseline in docs/DB_SCHEMA.md.
+      - Make docs/DB_SCHEMA.md detailed enough to convert directly into schema.prisma during Feature Implementation 1.6.
+      - Define entity fields, Prisma types, DB types, nullability, defaults, uniqueness, indexes, relations, enums, constraints, ownership, ID strategy, lifecycle, common fields, Prisma mapping notes, and migration notes.
+      - Do not create or modify schema.prisma, Prisma migrations, package.json, or backend package files in this state.
       - Do not deploy to a real DB server in this state.
     allowed_extra_writes:
-      - app/be/package.json
-      - app/be/prisma/**
-      - package.json
+      - docs/DB_SCHEMA.md
     ask_user_when:
-      - Database provider, persistence need, or backend package path is unclear.
+      - Database provider, persistence need, entity ownership, relation cardinality, field nullability, index strategy, enum values, or lifecycle policy is unclear.
 
   API_DESIGN:
     required_outputs:

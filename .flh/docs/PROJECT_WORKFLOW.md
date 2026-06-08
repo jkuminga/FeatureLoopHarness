@@ -148,27 +148,24 @@ skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
 ## 4. Data Model Definition
 
 실제 프로젝트의 데이터 모델 baseline을 정의하는 단계다.
+이 단계는 Prisma 파일을 생성하는 단계가 아니라, 프로젝트 전체 DB schema의 단일 truth source인 `docs/DB_SCHEMA.md`를 완성하는 단계다.
 
 템플릿 문서:
 
 - `docs/DB_SCHEMA.md`
 
-허용되는 예외 작업:
+금지되는 작업:
 
-- `app/be/package.json` 생성/수정
 - `app/be/prisma/schema.prisma` 생성/수정
-- `app/be/prisma/migrations/**` baseline migration 생성 또는 준비
+- `app/be/prisma/migrations/**` 생성/수정
+- `app/be/package.json` 생성/수정
 - 루트 `package.json`의 DB forwarding script 생성/수정
+- 실제 DB 서버 배포
 
-이 예외는 데이터 모델 baseline을 만들기 위한 작업에만 적용한다.
-앱 기능 구현, API 구현, UI 구현, 기능 테스트 작성은 여전히 금지한다.
+목표는 `docs/DB_SCHEMA.md`를 `schema.prisma`로 즉시 변환할 수 있는 Prisma-ready 명세로 확정하는 것이다.
+entity field, Prisma type, DB type, nullable, default, unique, index, relation, enum, constraint, ownership, lifecycle, Prisma mapping note, migration note가 문서 안에 충분히 구체적으로 있어야 한다.
 
-이 단계는 실제 DB 서버 배포를 강제하지 않는다.
-목표는 구현을 시작할 수 있을 만큼 데이터 모델 baseline 산출물을 확정하는 것이다.
-Prisma baseline은 루트 `prisma/`가 아니라 backend package인 `app/be/prisma/`에 둔다.
-루트 `package.json`은 하네스와 CI가 공통 명령을 호출할 수 있도록 `app/be`의 DB script를 위임하는 역할만 맡는다.
-
-실제 DB 서버 배포와 검증은 `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
+실제 `schema.prisma`, baseline migration, DB deploy/verify script 생성과 실제 DB 서버 배포/검증은 `FEATURE_IMPLEMENTATION` 상태의 `1.6. Baseline DB Deployment`에서 수행한다.
 그 결과는 `.flh/runtime/STATE.md`의 `approvals.database_baseline`에 기록한다.
 
 완료 기준은 다음을 따른다.
