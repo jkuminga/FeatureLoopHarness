@@ -232,6 +232,7 @@ class PreCommitScriptTest(unittest.TestCase):
                     "created": True,
                 },
                 "database_baseline": {
+                    "required": True,
                     "verified": True,
                 },
             },
@@ -260,6 +261,78 @@ class PreCommitScriptTest(unittest.TestCase):
 
         self.assertTrue(allowed, reason)
 
+    def test_database_baseline_approval_allows_no_database_skip(self):
+        state = {
+            "approvals": {
+                "database_baseline": {
+                    "required": False,
+                    "skipped": True,
+                }
+            }
+        }
+
+        self.assertTrue(self.module.has_database_baseline_approval(state))
+
+    def test_database_baseline_approval_rejects_legacy_verified_without_required(self):
+        state = {
+            "approvals": {
+                "database_baseline": {
+                    "verified": True,
+                }
+            }
+        }
+
+        self.assertFalse(self.module.has_database_baseline_approval(state))
+
+    def test_database_baseline_exception_rejects_no_database_skip_with_source_files(self):
+        source_layout = {
+            "project": {
+                "scaffold_extra_root_files": [],
+            },
+            "source_roots": {
+                "backend": {
+                    "path": "app/be",
+                    "package": True,
+                }
+            },
+        }
+        state = {
+            "current_state": "FEATURE_IMPLEMENTATION",
+            "approvals": {
+                "source_scaffold": {
+                    "created": True,
+                },
+                "database_baseline": {
+                    "required": False,
+                    "skipped": True,
+                },
+            },
+        }
+        committed_state = {
+            "current_state": "FEATURE_IMPLEMENTATION",
+            "approvals": {
+                "source_scaffold": {
+                    "created": True,
+                },
+            },
+        }
+        roots = self.module.source_roots(source_layout)
+        source_root = self.module.match_source_root(
+            "app/be/prisma/schema.prisma",
+            roots,
+        )
+
+        allowed, reason = self.module.database_baseline_exception_allowed(
+            ["app/be/prisma/schema.prisma", ".flh/runtime/STATE.md"],
+            [("app/be/prisma/schema.prisma", source_root)],
+            source_layout,
+            state,
+            committed_state,
+        )
+
+        self.assertFalse(allowed)
+        self.assertIn("skip approval", reason)
+
     def test_database_baseline_exception_blocks_feature_code(self):
         source_layout = {
             "project": {
@@ -279,6 +352,7 @@ class PreCommitScriptTest(unittest.TestCase):
                     "created": True,
                 },
                 "database_baseline": {
+                    "required": True,
                     "verified": True,
                 },
             },

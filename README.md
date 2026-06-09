@@ -223,15 +223,29 @@ backlog
 ### Baseline DB Deployment
 
 `DATA_MODEL_DEFINITION` 단계는 실제 Prisma 파일을 만들지 않고, `docs/DB_SCHEMA.md`를 Prisma-ready 데이터 모델 명세로 확정하는 단계다.
-`app/be/prisma/schema.prisma`, baseline migration, DB deploy/verify script 생성은 첫 기능 구현을 시작하기 전 `FEATURE_IMPLEMENTATION`의 `1.6. Baseline DB Deployment`에서 수행한다.
-Prisma baseline은 기본적으로 backend package인 `app/be` 안에서 관리한다.
+첫 기능 구현을 시작하기 전 `FEATURE_IMPLEMENTATION`의 `1.6. Baseline DB Deployment`는 먼저 `docs/source-layout.yml`의 `project.persistence.database_required` 값을 확인한다.
+`database_required: false`인 프로젝트는 DB 배포를 실행하지 않고 skip approval만 기록한다.
+`database_required: true`인 프로젝트는 `app/be/prisma/schema.prisma`, baseline migration, DB deploy/verify script를 생성하고 실제 DB에 반영한다.
+DB-backed 프로젝트의 공식 자동 baseline은 Prisma 기준으로만 수행하며, Prisma baseline은 기본적으로 backend package인 `app/be` 안에서 관리한다.
 DB 배포 전에 source package scaffold baseline을 먼저 완료해 package/script 기반을 준비한다.
 
 첫 기능을 `active/`로 옮기기 전에 다음을 확인한다.
 
+DB 미사용 프로젝트:
+
 ```yaml
 approvals:
   database_baseline:
+    required: false
+    skipped: true
+```
+
+Prisma DB-backed 프로젝트:
+
+```yaml
+approvals:
+  database_baseline:
+    required: true
     deployed: true
     verified: true
 ```

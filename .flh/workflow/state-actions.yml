@@ -22,10 +22,11 @@ states:
       - docs/source-layout.yml
       - source directories listed in docs/source-layout.yml
     actions:
-      - Decide project type, package manager, runtime stack, testing tools, and source layout.
+      - Decide project type, package manager, runtime stack, persistence need, database provider, testing tools, and source layout.
       - Use docs/source-layout.yml as the required architecture decision checklist.
       - Ask the user for any missing docs/source-layout.yml fields before marking architecture completed.
       - Write docs/source-layout.yml.
+      - Record project-level persistence.database_required and persistence.database_provider decisions in docs/source-layout.yml.
       - Record package-level framework, runtime, language, module, testing, and tooling decisions in docs/source-layout.yml.
       - Record project.scaffold_extra_root_files in docs/source-layout.yml only when scaffold baseline needs root files outside the default scaffold categories.
       - Create only the directories listed in docs/source-layout.yml.
@@ -38,7 +39,7 @@ states:
       - apps/**/.gitkeep
       - packages/**/.gitkeep
     ask_user_when:
-      - Project type, workspace policy, package manager, runtime, language, module, or source layout is unclear.
+      - Project type, workspace policy, package manager, runtime, language, module, persistence need, database provider, or source layout is unclear.
       - Unit, integration, E2E, or component testing tools are unclear.
       - Lint or format tooling is unclear.
       - Multiple frontend/backend/package layouts are plausible.
@@ -105,7 +106,7 @@ states:
       - Verify source package scaffold baseline before creating the first feature branch/worktree.
       - If source scaffold approval is missing, run Source Package Scaffold Baseline before DB deployment and feature work.
       - Use AGENTS.md review rules for docs/features/review patch requests.
-      - Verify database baseline after scaffold baseline and before moving the first DB-backed feature to active.
+      - Verify database baseline status after scaffold baseline and before moving the first feature to active.
     allowed_extra_writes:
       - controlled by AGENTS.md and FEATURE_IMPLEMENTATION_PIPELINE.md
     ask_user_when:
@@ -113,4 +114,4 @@ states:
       - active or review already contains a feature.
       - source scaffold approval is missing.
       - source scaffold needs more information than docs/source-layout.yml provides.
-      - database baseline approval is missing for a DB-backed project.
+      - database baseline approval is missing for a DB-backed project, or no-database skip approval is missing for a project that does not require a DB.

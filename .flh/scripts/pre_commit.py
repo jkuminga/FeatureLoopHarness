@@ -398,7 +398,11 @@ def has_database_baseline_approval(state: dict[str, Any]) -> bool:
     database_baseline = approvals.get("database_baseline")
     if not isinstance(database_baseline, dict):
         return False
-    return database_baseline.get("verified") is True
+    if database_baseline.get("required") is False:
+        return database_baseline.get("skipped") is True
+    if database_baseline.get("required") is True:
+        return database_baseline.get("verified") is True
+    return False
 
 
 def scaffold_exception_allowed(
@@ -454,6 +458,9 @@ def database_baseline_exception_allowed(
         return False, "이전 커밋에 이미 database baseline approval이 기록되어 있습니다."
     if not has_database_baseline_approval(current_state):
         return False, "현재 STATE.md에 database baseline approval 기록이 없습니다."
+    current_database_baseline = current_state.get("approvals", {}).get("database_baseline", {})
+    if isinstance(current_database_baseline, dict) and current_database_baseline.get("required") is False:
+        return False, "DB 미사용 skip approval은 source file 변경을 포함할 수 없습니다."
     if ".flh/runtime/STATE.md" not in staged_files:
         return False, "database baseline approval을 기록한 .flh/runtime/STATE.md가 staged되지 않았습니다."
 

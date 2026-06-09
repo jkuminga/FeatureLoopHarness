@@ -137,7 +137,7 @@ ID 작성 규칙:
 - relation 이름
 - `@map` 또는 `@@map` 필요 여부
 - provider별 주의사항
-- unsupported type 또는 raw SQL 필요 여부
+- Prisma schema로 표현하기 어려운 제약 여부
 
 ---
 

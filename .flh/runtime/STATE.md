@@ -54,11 +54,27 @@ approvals:
 
 ### `approvals.database_baseline`
 
-첫 기능을 `docs/features/active/`로 이동하기 전에 실제 개발 DB baseline 배포와 검증이 성공한 경우 기록한다.
+첫 기능을 `docs/features/active/`로 이동하기 전에 DB baseline이 처리되었음을 기록한다.
+DB가 필요 없는 프로젝트는 skip approval을 기록하고, DB-backed 프로젝트는 Prisma baseline 배포와 검증 결과를 기록한다.
+
+DB 미사용 프로젝트:
 
 ```yaml
 approvals:
   database_baseline:
+    required: false
+    skipped: true
+    reason: database_not_required
+    based_on: docs/source-layout.yml
+    decided_at: 2026-06-09T00:00:00Z
+```
+
+Prisma DB-backed 프로젝트:
+
+```yaml
+approvals:
+  database_baseline:
+    required: true
     migration_tool: prisma
     database: postgresql
     environment: development

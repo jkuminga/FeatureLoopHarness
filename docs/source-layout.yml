@@ -6,6 +6,9 @@ project:
   package_manager: "{{TODO_PACKAGE_MANAGER}}"
   workspace: "{{TODO_WORKSPACE_TRUE_OR_FALSE}}"
   runtime: "{{TODO_RUNTIME}}"
+  persistence:
+    database_required: "{{TODO_DATABASE_REQUIRED_TRUE_OR_FALSE}}"
+    database_provider: "{{TODO_DATABASE_PROVIDER_OR_NONE}}"
   scaffold_extra_root_files: []
 
 source_roots:

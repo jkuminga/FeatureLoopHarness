@@ -114,11 +114,13 @@ skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
 - scaffold 정책
 - 아키텍처 제약사항
 
-`docs/source-layout.yml`은 아키텍처 단계에서 결정한 source directory, package별 framework/runtime/language/module, testing tool, lint/format tooling을 기계가 읽을 수 있게 기록하는 manifest다.
+`docs/source-layout.yml`은 아키텍처 단계에서 결정한 source directory, project-level persistence 여부, database provider, package별 framework/runtime/language/module, testing tool, lint/format tooling을 기계가 읽을 수 있게 기록하는 manifest다.
 에이전트는 이 파일을 아키텍처 단계의 필수 결정 체크리스트로 사용하고, TODO 또는 누락 필드가 있으면 사용자에게 먼저 질문한다.
 에이전트는 이 파일에 적힌 source directory만 생성하고, 빈 디렉토리에는 `.gitkeep`만 둔다.
 아키텍처 단계에서는 framework scaffold나 실제 구현 코드를 생성하지 않는다.
 테스트 도구 설치와 설정은 최초 기능 구현 전에 수행하는 source package scaffold baseline에서 다룬다.
+DB 사용 여부는 `project.persistence.database_required`에 기록한다.
+DB를 사용하지 않는 프로젝트는 `database_required: false`와 `database_provider: none`으로 표시한다.
 
 완료 기준은 다음을 따른다.
 
@@ -165,8 +167,9 @@ skip된 단계의 산출물은 completed artifact로 가정하지 않는다.
 목표는 `docs/DB_SCHEMA.md`를 `schema.prisma`로 즉시 변환할 수 있는 Prisma-ready 명세로 확정하는 것이다.
 entity field, Prisma type, DB type, nullable, default, unique, index, relation, enum, constraint, ownership, lifecycle, Prisma mapping note, migration note가 문서 안에 충분히 구체적으로 있어야 한다.
 
-실제 `schema.prisma`, baseline migration, DB deploy/verify script 생성과 실제 DB 서버 배포/검증은 `FEATURE_IMPLEMENTATION` 상태의 `1.6. Baseline DB Deployment`에서 수행한다.
-그 결과는 `.flh/runtime/STATE.md`의 `approvals.database_baseline`에 기록한다.
+실제 `schema.prisma`, baseline migration, DB deploy/verify script 생성과 실제 DB 서버 배포/검증은 DB-backed project에서만 `FEATURE_IMPLEMENTATION` 상태의 `1.6. Baseline DB Deployment`에서 수행한다.
+DB를 사용하지 않는 프로젝트는 같은 단계에서 DB 배포를 실행하지 않고 skip approval을 기록한다.
+두 경우 모두 결과는 `.flh/runtime/STATE.md`의 `approvals.database_baseline`에 기록한다.
 
 완료 기준은 다음을 따른다.
 

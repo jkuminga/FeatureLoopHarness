@@ -197,36 +197,48 @@ approvals:
 
 ## 1.6. Baseline DB Deployment
 
-실제 Prisma schema 생성, baseline migration 생성, DB 서버 배포는 프로젝트 전체 `DATA_MODEL_DEFINITION` 단계가 아니라, `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
+DB baseline 처리는 프로젝트 전체 `DATA_MODEL_DEFINITION` 단계가 아니라, `FEATURE_IMPLEMENTATION` 상태에서 첫 기능 구현을 시작하기 전에 한 번 수행한다.
+DB가 필요 없는 프로젝트는 이 단계에서 skip approval만 기록하고, DB가 필요한 프로젝트는 Prisma schema 생성, baseline migration 생성, DB 서버 배포와 검증을 수행한다.
 
 목적:
 
-- `docs/DB_SCHEMA.md`의 Prisma-ready 명세를 기준으로 `app/be/prisma/schema.prisma`를 반드시 생성한다.
+- `docs/source-layout.yml`의 persistence 결정을 기준으로 DB baseline이 필요한지 먼저 판단한다.
+- DB가 필요 없는 프로젝트는 DB 배포 없이 skip approval을 기록한다.
+- DB가 필요한 프로젝트는 `docs/DB_SCHEMA.md`의 Prisma-ready 명세를 기준으로 `app/be/prisma/schema.prisma`를 생성한다.
 - 생성한 `schema.prisma`에서 baseline migration을 만들고 실제 개발 DB에 반영한다.
-- 첫 기능 구현부터 실제 DB 연결을 기준으로 개발할 수 있게 한다.
-- migration tool, database, environment, 검증 여부를 비밀값 없이 기록한다.
+- DB가 필요한 프로젝트에서는 첫 기능 구현부터 실제 DB 연결을 기준으로 개발할 수 있게 한다.
+- baseline 필요 여부, migration tool, database, environment, 검증 여부를 비밀값 없이 기록한다.
 
 실행 시점:
 
 - `docs/features/active/`로 첫 기능을 이동하기 전
 - `.flh/runtime/STATE.md`에 `approvals.source_scaffold.created: true`가 기록된 뒤
-- `.flh/runtime/STATE.md`에 `approvals.database_baseline.verified: true`가 없을 때
+- `.flh/runtime/STATE.md`에 database baseline 완료 기록이 없을 때
+
+완료 기록:
+
+- DB 미사용 프로젝트: `approvals.database_baseline.required: false`와 `approvals.database_baseline.skipped: true`
+- Prisma DB-backed 프로젝트: `approvals.database_baseline.required: true`와 `approvals.database_baseline.verified: true`
 
 절차:
 
-1. `docs/source-layout.yml`과 `docs/DB_SCHEMA.md`를 확인한다.
-2. DB-backed project인지 확인한다.
-3. `docs/DB_SCHEMA.md`의 Entity Specifications, Relation Specifications, Indexes and Constraints, Enums, Prisma Mapping Notes, Migration Notes를 기준으로 `app/be/prisma/schema.prisma`를 생성한다.
-4. `schema.prisma` 생성에 필요한 정보가 `docs/DB_SCHEMA.md`에 부족하면 임의 추론하지 말고 사용자에게 질문하고, 필요하면 먼저 `docs/DB_SCHEMA.md`를 보강한다.
-5. 생성한 `schema.prisma`가 `docs/DB_SCHEMA.md`의 entity, field, relation, enum, index, constraint를 빠짐없이 반영하는지 대조한다.
-6. backend package에 Prisma CLI, `@prisma/client`, DB deploy/verify script가 없으면 source scaffold baseline 범위 안에서 추가한다.
-7. 사용자에게 사용할 DB provider 또는 Prisma-compatible database, environment를 확인한다.
-8. 필요한 환경변수/API key/connection string을 사용자에게 요청한다.
-9. 비밀값은 `.env`, 배포 플랫폼 secret, 또는 사용자가 지정한 안전한 위치에만 둔다.
-10. 비밀값을 docs, feature 문서, `STATE.md`에 기록하지 않는다.
-11. baseline migration을 생성하고 실제 DB에 적용한다.
-12. 실제 DB 연결과 baseline schema 반영 여부를 검증한다.
-13. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 승인 기록만 남긴다.
+1. `docs/source-layout.yml`의 `project.persistence.database_required`와 `project.persistence.database_provider`를 확인한다.
+2. persistence 값이 없거나 명확하지 않으면 임의로 판단하지 말고 사용자에게 질문한다.
+3. `database_required: false`이면 DB baseline을 실행하지 않는다.
+4. DB 미사용 프로젝트로 확인되면 `.flh/runtime/STATE.md`에 비밀값 없는 skip approval을 기록한다.
+5. `database_required: true`이면 `docs/DB_SCHEMA.md`를 확인한다.
+6. DB-backed project의 공식 자동 baseline은 Prisma 기준으로만 수행한다.
+7. `docs/DB_SCHEMA.md`의 Entity Specifications, Relation Specifications, Indexes and Constraints, Enums, Prisma Mapping Notes, Migration Notes를 기준으로 `app/be/prisma/schema.prisma`를 생성한다.
+8. `schema.prisma` 생성에 필요한 정보가 `docs/DB_SCHEMA.md`에 부족하면 임의 추론하지 말고 사용자에게 질문하고, 필요하면 먼저 `docs/DB_SCHEMA.md`를 보강한다.
+9. 생성한 `schema.prisma`가 `docs/DB_SCHEMA.md`의 entity, field, relation, enum, index, constraint를 빠짐없이 반영하는지 대조한다.
+10. backend package에 Prisma CLI, `@prisma/client`, DB deploy/verify script가 없으면 source scaffold baseline 범위 안에서 추가한다.
+11. 사용자에게 사용할 DB provider 또는 Prisma-compatible database, environment를 확인한다.
+12. 필요한 환경변수/API key/connection string을 사용자에게 요청한다.
+13. 비밀값은 `.env`, 배포 플랫폼 secret, 또는 사용자가 지정한 안전한 위치에만 둔다.
+14. 비밀값을 docs, feature 문서, `STATE.md`에 기록하지 않는다.
+15. baseline migration을 생성하고 실제 DB에 적용한다.
+16. 실제 DB 연결과 baseline schema 반영 여부를 검증한다.
+17. 성공하면 `.flh/runtime/STATE.md`에 비밀값 없는 verified approval을 기록한다.
 
 권장 명령 이름:
 
@@ -237,9 +249,24 @@ npm run db:verify
 
 기록 예시:
 
+DB 미사용 프로젝트:
+
 ```yaml
 approvals:
   database_baseline:
+    required: false
+    skipped: true
+    reason: database_not_required
+    based_on: docs/source-layout.yml
+    decided_at: 2026-06-09T00:00:00Z
+```
+
+Prisma DB-backed 프로젝트:
+
+```yaml
+approvals:
+  database_baseline:
+    required: true
     migration_tool: prisma
     database: postgresql
     environment: development
@@ -250,8 +277,11 @@ approvals:
 
 규칙:
 
+- DB 미사용 프로젝트도 `.flh/runtime/STATE.md`에 `approvals.database_baseline.required: false`와 `approvals.database_baseline.skipped: true`를 기록한다.
+- DB 미사용 프로젝트의 skip approval은 source file 변경을 포함하지 않는다.
+- DB-backed project의 공식 자동 baseline은 Prisma 기준으로만 수행한다.
 - Prisma baseline은 backend package인 `app/be/prisma/`를 기준으로 이 단계에서 생성한다.
-- `DATA_MODEL_DEFINITION` 단계는 `schema.prisma`를 만들지 않는다. 이 단계에서는 반드시 `docs/DB_SCHEMA.md`를 실행 가능한 Prisma schema로 변환한다.
+- `DATA_MODEL_DEFINITION` 단계는 `schema.prisma`를 만들지 않는다. DB가 필요한 프로젝트에서는 이 단계에서 반드시 `docs/DB_SCHEMA.md`를 실행 가능한 Prisma schema로 변환한다.
 - 루트 `db:*` script는 필요하면 `app/be`의 Prisma script로 위임한다.
 - DB SaaS 이름은 필수값이 아니다. Prisma migration과 verify command가 충분히 동작하면 `DATABASE_URL` 같은 env만으로 진행할 수 있다.
 - Supabase, Neon, RDS처럼 서비스 특성에 따라 direct URL, pooler URL, SSL, migration 권한이 달라지는 경우에는 사용자에게 서비스 정보를 질문한다.
@@ -259,7 +289,8 @@ approvals:
 - `db:verify`는 실제 DB 연결, migration 적용 여부, 핵심 테이블 존재 여부를 확인한다.
 - 필요한 env가 없으면 사용자에게 필요한 값을 안내하고 중단한다. 사용자가 env를 채운 뒤 같은 구현 요청을 다시 보내면 현재 파일과 `STATE.md` 기준으로 다시 판단한다.
 - `db:verify`가 실패하면 첫 기능 구현을 시작하지 않는다.
-- 이미 `approvals.database_baseline.verified: true`면 이 단계는 생략할 수 있다.
+- 이미 `approvals.database_baseline.required: false`와 `approvals.database_baseline.skipped: true`가 기록되어 있으면 이 단계는 생략할 수 있다.
+- 이미 `approvals.database_baseline.required: true`와 `approvals.database_baseline.verified: true`가 기록되어 있으면 이 단계는 생략할 수 있다.
 
 ---
 
@@ -272,8 +303,10 @@ approvals:
 - 모든 구현 작업은 별도 워크트리에서 진행한다.
 - 첫 기능 구현 전 `.flh/runtime/STATE.md`의 `approvals.source_scaffold.created`가 `true`인지 확인한다.
 - 아직 source scaffold baseline이 완료되지 않았다면 먼저 `Source Package Scaffold Baseline`을 수행한다.
-- DB-backed project라면 첫 기능 구현 전 `.flh/runtime/STATE.md`의 `approvals.database_baseline.verified`가 `true`인지 확인한다.
-- DB-backed project인데 아직 baseline DB가 검증되지 않았다면 먼저 `Baseline DB Deployment`를 수행한다.
+- 첫 기능 구현 전 `.flh/runtime/STATE.md`에 database baseline 완료 기록이 있는지 확인한다.
+- DB 미사용 프로젝트라면 `approvals.database_baseline.required: false`와 `approvals.database_baseline.skipped: true`가 필요하다.
+- DB-backed project라면 `approvals.database_baseline.required: true`와 `approvals.database_baseline.verified: true`가 필요하다.
+- database baseline 완료 기록이 없으면 먼저 `Baseline DB Deployment`를 수행하거나 skip approval을 기록한다.
 - 브랜치 이름은 기능 디렉토리명을 기반으로 한다.
 - 워크트리 이름도 기능 디렉토리명을 기반으로 한다.
 - 구현 시작 전 `SPEC.md`, `CHECKLIST.md`, `TEST_CASES.md`를 다시 확인한다.

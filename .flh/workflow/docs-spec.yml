@@ -47,6 +47,8 @@ documents:
       - project.package_manager
       - project.workspace
       - project.runtime
+      - project.persistence.database_required
+      - project.persistence.database_provider
       - source_roots
     required_yaml_mapping: source_roots
     required_yaml_mapping_item_fields:
