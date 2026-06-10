@@ -38,12 +38,7 @@
 ## Review Patch
 
 - If `docs/features/review/` contains a feature directory, user edit requests target that feature by default.
+- Use one `fix/*` review branch/worktree per review feature until the user explicitly approves completion.
+- Follow `.flh/docs/REVIEW_PATCH_PIPELINE.md` for review feature edits.
 - Do not run `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md` for review feature edits.
-- Apply only lightweight patches: understand the requested change, keep scope minimal, and edit only what is needed.
-- Run related tests when applicable.
-- For UI/UX-related review patch requests, run Playwright-based verification after the change when the app can be run locally.
-- Save Playwright screenshots, traces, reports, or failure notes under `docs/features/review/FEAT-XXX-name/artifacts/review-patches/YYYY-MM-DD-short-summary/`.
-- If Playwright verification fails, fix the cause and rerun verification until it passes or a clear blocker is identified.
-- If Playwright verification is blocked by environment, dependency, or external-service issues, record the blocker and evidence under the feature's `artifacts/` directory and report it to the user.
-- Update the feature's `QUALITY_SCORE.md` if the change affects quality.
 - Move a feature from `docs/features/review/` to `docs/features/done/` only when the user explicitly approves completion.
