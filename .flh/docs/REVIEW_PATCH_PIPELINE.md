@@ -102,10 +102,17 @@ Playwright 검증이 실패하면 원인을 수정하고 다시 검증한다.
 
 ## 7. Commit Policy
 
-Review patch commit은 해당 review branch에서 수행한다.
+Review patch의 기본 커밋 정책은 사용자 명시 커밋 방식이다.
+
+에이전트는 review patch 요청을 받으면 수정, 검증, 필요한 artifacts 기록, 품질 점수 갱신까지 수행할 수 있다.
+다만 커밋은 사용자가 명시적으로 커밋을 요청했을 때 해당 review branch에서 수행한다.
+
+사용자가 커밋을 요청하기 전까지는 같은 review branch/worktree에 변경사항을 유지할 수 있다.
+사소한 수정 요청이 여러 번 이어지는 경우, 사용자가 커밋을 요청하는 시점에 하나의 커밋으로 묶을 수 있다.
+변경 목적이 서로 다르거나 사용자가 분리를 요청한 경우에는 여러 커밋으로 나눌 수 있다.
 
 main/master에는 source 변경을 직접 커밋하지 않는다.
-하나의 사용자 수정 요청은 하나 이상의 커밋으로 나눌 수 있지만, 커밋 범위는 review 대상 기능에 한정한다.
+커밋 범위는 review 대상 기능에 한정한다.
 
 커밋 전에는 다음을 확인한다.
 
@@ -128,8 +135,9 @@ main/master에는 source 변경을 직접 커밋하지 않는다.
 1. 최종 검증을 실행한다.
 2. 필요한 품질 점수와 feature index를 갱신한다.
 3. 기능 디렉토리를 `docs/features/review/`에서 `docs/features/done/`으로 이동한다.
-4. review branch를 main/master로 merge한다.
-5. review worktree와 branch를 정리한다.
+4. 아직 커밋되지 않은 review 변경사항이 있으면 review branch에서 커밋한다.
+5. review branch를 main/master로 merge한다.
+6. review worktree와 branch를 정리한다.
 
 완료 승인이 없다면 review branch/worktree는 유지하고, 이후 같은 review 기능에 대한 수정 요청은 같은 branch/worktree에서 이어서 처리한다.
 
@@ -150,6 +158,7 @@ Review patch 중 충돌이 발생하면 관련 파일과 충돌 이유를 먼저
 - review patch는 full feature implementation pipeline을 다시 실행하지 않는다.
 - source 변경이 있으면 main/master에서 직접 커밋하지 않는다.
 - 하나의 review 기능은 `done/`으로 이동하기 전까지 하나의 `fix/*` branch/worktree를 재사용한다.
+- review patch commit은 사용자가 명시적으로 커밋을 요청했을 때 수행한다.
 - 수정 범위는 사용자가 요청한 내용에 한정한다.
 - UI/UX 변경은 Playwright 기반 검증을 수행한다.
 - 검증 자료와 blocker는 `artifacts/review-patches/` 아래에 기록한다.

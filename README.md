@@ -220,6 +220,24 @@ backlog
 
 `done/` 이동은 사용자가 명시적으로 완료를 승인했을 때만 수행한다.
 
+### Review Patch Flow
+
+Review patch는 `docs/features/review/`에 있는 기능을 대상으로 하는 lightweight 수정 흐름이다.
+세부 절차는 `.flh/docs/REVIEW_PATCH_PIPELINE.md`를 따른다.
+
+source 변경이 포함된 review patch는 main/master에서 직접 커밋하지 않는다.
+리뷰 대상 기능마다 하나의 `fix/*` branch/worktree를 만들고, 사용자가 해당 기능의 완료를 명시적으로 승인할 때까지 같은 branch/worktree를 재사용한다.
+
+예시:
+
+```text
+feature: docs/features/review/FEAT-001-login
+branch: fix/FEAT-001-login-review
+worktree: FEAT-001-login-review
+```
+
+UI/UX 변경은 Playwright 기반으로 검증하고, 검증 자료나 blocker는 해당 기능의 `artifacts/review-patches/` 아래에 기록한다.
+
 ### Baseline DB Deployment
 
 `DATA_MODEL_DEFINITION` 단계는 실제 Prisma 파일을 만들지 않고, `docs/DB_SCHEMA.md`를 Prisma-ready 데이터 모델 명세로 확정하는 단계다.
@@ -309,4 +327,5 @@ docs/features/active/FEAT-XXX-name/QUALITY_SCORE.md
 - `AGENTS.md`: Codex 작업 규칙
 - `.flh/docs/PROJECT_WORKFLOW.md`: 프로젝트 전체 workflow 설명
 - `.flh/docs/FEATURE_IMPLEMENTATION_PIPELINE.md`: 기능 단위 구현 파이프라인
+- `.flh/docs/REVIEW_PATCH_PIPELINE.md`: review 상태 기능의 lightweight 수정 파이프라인
 - `docs/docs-map.md`: 문서/설정 파일 지도
