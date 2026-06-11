@@ -79,17 +79,117 @@ hooks = true
 
 ## First-Time Use
 
-1. 이 템플릿을 git repo 안에서 사용한다.
-2. `npm install`을 실행해 Husky와 lint-staged를 설치하고 Git hook을 연결한다.
-3. Codex를 project root에서 실행한다.
-4. Codex에서 `/hooks`를 연다.
-5. `UserPromptSubmit` hook을 review/trust 처리한다.
-6. hook 파일이나 `.codex/hooks.json`을 수정했다면 다시 trust 처리한다.
+이 단계는 실제 애플리케이션 의존성을 설치하는 과정이 아니라, flh가 Git, Codex hook, Husky pre-commit hook을 통해 정상 동작하기 위한 최초 설정 과정이다.
+
+### Requirements
+
+- `git`
+- `node`
+- `npm`
+- `python3`
+- `PyYAML`
+- `Codex CLI`
+
+확인:
+
+```sh
+git --version
+node --version
+npm --version
+python3 --version
+python3 -c "import yaml; print('PyYAML OK')"
+codex --version
+```
+
+### Clone and Connect Your Repository
+
+flh는 Git branch, staged file, pre-commit hook을 기준으로 동작하므로 반드시 Git repo 안에서 사용한다.
+
+```sh
+git clone https://github.com/jkuminga/FeatureLoopHarness <PROJECT_DIR>
+cd <PROJECT_DIR>
+```
+
+클론 직후에는 `origin`이 flh 템플릿 저장소를 바라볼 수 있다.
+새 프로젝트로 사용하려면 기존 remote를 제거하고 본인 프로젝트 repo를 연결한다.
+
+```sh
+git remote -v
+git remote remove origin
+git remote add origin <YOUR_PROJECT_REPO_URL>
+git remote -v
+```
+
+초기 상태를 본인 repo로 push한다.
+
+```sh
+git push -u origin main
+```
+
+현재 기본 브랜치가 `master`라면 아래 명령을 사용한다.
+
+```sh
+git push -u origin master
+```
+
+### Install Dependencies
+
+Husky pre-commit hook과 lint-staged를 사용하기 위해 npm 의존성을 설치한다.
+
+```sh
+npm install
+```
+
+### Enable Codex Hook
+
+flh는 사용자 의도 검사와 프로젝트 상태 전이를 위해 Codex `UserPromptSubmit` hook을 사용한다.
+
+이 hook은 최초 사용 시 사용자가 실행을 승인해야 한다. 여기서 승인한다는 것은 hook 설정과 스크립트 경로를 확인한 뒤, Codex가 해당 hook을 실행해도 된다고 허용하는 것을 의미한다.
+
+현재 project-local hook의 실행 승인 작업은 Codex CLI의 `/hooks` 흐름을 기준으로 진행한다. Codex Desktop App을 주로 사용하더라도, hook 활성화를 위해서는 최초 설정 단계에서 Codex CLI를 사용하는 것을 권장한다.
+
+프로젝트 루트에서 Codex CLI를 실행한다.
+
+```sh
+codex
+```
+
+flh를 clone한 뒤 Codex CLI를 최초로 실행하면, CLI가 project-local hook을 감지하고 사용자에게 실행 승인 여부를 물어볼 수 있다.
+만약 이 안내가 자동으로 표시되지 않거나 나중에 다시 확인해야 한다면, Codex CLI 안에서 다음 명령을 실행한다.
+
+```text
+/hooks
+```
+
+`UserPromptSubmit` hook이 표시되면 내용을 확인하고, Codex가 해당 hook을 실행해도 된다고 승인한다.
+hook 파일이나 `.codex/hooks.json`을 수정한 경우에는 hook hash가 바뀔 수 있으므로 다시 `/hooks`에서 승인해야 할 수 있다.
+
+hook 승인 이후에는 Codex CLI와 Codex Desktop App 모두에서 하네스 구조와 파이프라인을 사용할 수 있다.
+
+### Check Script Permissions
+
+hook script 실행 권한이 누락되면 hook이 실행되지 않을 수 있다.
+
+확인:
+
+```sh
+ls -l .codex/hooks/user-prompt-submit.sh
+ls -l .flh/hooks/user-prompt-submit.sh
+ls -l .flh/scripts/pre_commit.py
+```
+
+실행 권한이 없다면 아래 명령을 실행한다.
+
+```sh
+chmod +x .codex/hooks/user-prompt-submit.sh
+chmod +x .flh/hooks/user-prompt-submit.sh
+chmod +x .flh/scripts/pre_commit.py
+```
 
 검증:
 
 ```sh
-python3 -m unittest tests/hooks/test_user_prompt_submit.py
+npm test
 printf '아키텍처 설계하자' | .codex/hooks/user-prompt-submit.sh
 codex exec '아키텍처 설계하자'
 ```
@@ -110,8 +210,8 @@ hook이 실행되지 않거나 block되지 않으면 다음 순서로 확인한�
    git rev-parse --show-toplevel
    ```
 
-2. Codex에서 `/hooks`를 열고 `UserPromptSubmit` hook이 trusted 상태인지 확인한다.
-   hook 파일이나 `.codex/hooks.json`을 수정했다면 다시 trust 처리해야 할 수 있다.
+2. Codex CLI에서 `/hooks`를 열고 `UserPromptSubmit` hook이 승인된 상태인지 확인한다.
+   hook 파일이나 `.codex/hooks.json`을 수정했다면 다시 승인해야 할 수 있다.
 
 3. wrapper가 직접 실행되는지 확인한다.
    ```sh
